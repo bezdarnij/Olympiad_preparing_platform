@@ -1,6 +1,6 @@
-pycache/
-data/pycache/
-forms/pycache/
+_pycache_/
+data/_pycache_/
+forms/_pycache_/
 venv/
 env/
 .venv/
