@@ -1,11 +1,12 @@
-
-from flask import Flask, render_template, redirect, request, abort
+from flask import Flask, render_template, redirect, request, abort, session
 from data import db_session
 from data.news import News
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.users import User
 from forms.news import NewsForm
 from forms.user import RegisterForm, LoginForm
+from flask_socketio import SocketIO, join_room, leave_room, emit
+import uuid
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
@@ -13,7 +14,8 @@ app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-
+socketio = SocketIO(app, cors_allowed_origins="*")
+matches = {}
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -31,7 +33,6 @@ def index():
     else:
         news = db_sess.query(News).filter(News.is_private != True)
     return render_template("index.html", news=news)
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
@@ -77,7 +78,7 @@ def logout():
     logout_user()
     return redirect("/")
 
-@app.route('/news',  methods=['GET', 'POST'])
+@app.route('/news', methods=['GET', 'POST'])
 @login_required
 def add_news():
     form = NewsForm()
@@ -126,6 +127,7 @@ def edit_news(id):
                            title='Редактирование новости',
                            form=form
                            )
+
 @app.route('/news_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 def news_delete(id):
@@ -139,5 +141,58 @@ def news_delete(id):
     else:
         abort(404)
     return redirect('/')
+
+
+@app.route('/pvp/create')
+@login_required
+def create_pvp():
+    room = str(uuid.uuid4())
+    session['room'] = room
+    matches[room] = {
+        'players': [current_user.id],
+        'completed': {str(current_user.id): 0}
+    }
+    return redirect(f'/pvp/room/{room}')
+
+@app.route('/pvp/join/<room>')
+@login_required
+def join_pvp(room):
+    if room not in matches:
+        abort(404)
+    if len(matches[room]['players']) >= 2:
+        return "комната заполнена", 400
+    if current_user.id in matches[room]['players']:
+        return redirect(f'/pvp/room/{room}')
+    matches[room]['players'].append(current_user.id)
+    matches[room]['completed'][str(current_user.id)] = 0
+    session['room'] = room
+    return redirect(f'/pvp/room/{room}')
+
+@app.route('/pvp/room/<room>')
+@login_required
+def pvp_room(room):
+    if room not in matches or current_user.id not in matches[room]['players']:
+        abort(403)
+    return render_template('') # cюда шаблончик бах
+
+@socketio.on('join')
+def on_join(data):
+    room = data['room']
+    join_room(room)
+    emit('status', {'msg': f'{current_user.name} присоединился к комнате.'}, room=room)
+
+@socketio.on('submit_code')
+def on_submit(data):
+    room = data['room']
+    if room not in matches:
+        return
+    uid = str(current_user.id)
+    if uid not in matches[room]['completed']:
+        matches[room]['completed'][uid] = 0
+    matches[room]['completed'][uid] += 1
+    emit('update_scores', {
+        'scores': matches[room]['completed']
+    }, room=room)
+
 if __name__ == '__main__':
-    app.run(port=8025, host='127.0.0.1')
+    socketio.run(app, port=8025, host='127.0.0.1', allow_unsafe_werkzeug=True)
