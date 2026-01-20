@@ -8,6 +8,10 @@ from data.submissions import Submissions
 from data.submission_results import SubmissionResults
 from data.task_tests import TaskTest
 from forms.news import NewsForm
+from data.tasks import Tasks
+from data.submissions import Submissions
+from data.submission_results import SubmissionResults
+from data.task_tests import TaskTest
 from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import uuid
@@ -177,7 +181,7 @@ def join_pvp(room):
 def pvp_room(room):
     if room not in matches or current_user.id not in matches[room]['players']:
         abort(403)
-    return render_template('') # cюда шаблончик бах
+    return render_template('Pvp.html') # cюда шаблончик бах
 
 @socketio.on('join')
 def on_join(data):
