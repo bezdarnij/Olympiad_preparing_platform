@@ -21,6 +21,7 @@ class User(SqlAlchemyBase, UserMixin):
                                      default=datetime.datetime.now)
 
     news = orm.relationship("News", back_populates='user')
+    submissions = orm.relationship("Submissions", back_populates="user")
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
