@@ -13,10 +13,10 @@
 			<p>Условие задачи...</p>
 		</div>
 		<div class="task">
-			<div class="send">
-				<input type="file" name="f" />
-				<button>Отправить решение</button>
-			</div>
+			<form class="send" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" required />
+                <button type="submit">Отправить решение</button>
+            </form>
 			<div>
 				<p>Соперник решил задач:</p>
 				<p>Ты решил задач:</p>

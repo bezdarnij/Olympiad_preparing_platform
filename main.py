@@ -11,6 +11,8 @@ from data.task_tests import TaskTest
 from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import uuid
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
@@ -172,11 +174,19 @@ def join_pvp(room):
     session['room'] = room
     return redirect(f'/pvp/room/{room}')
 
-@app.route('/pvp/room/<room>')
+@app.route('/pvp/room/<room>', methods=["GET", "POST"])
 @login_required
 def pvp_room(room):
     if room not in matches or current_user.id not in matches[room]['players']:
         abort(403)
+    if request.method == "POST":
+        file = request.files.get("file")
+        if not file or file.filename == "":
+            return "Файл не выбран"
+        filename = secure_filename(file.filename)
+        os.makedirs("uploads", exist_ok=True)
+        file.save(os.path.join("uploads", filename))
+        return "Решение отправлено"
     return render_template('Pvp.html') # cюда шаблончик бах
 
 @socketio.on('join')
