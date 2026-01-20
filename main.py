@@ -3,6 +3,10 @@ from data import db_session
 from data.news import News
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.users import User
+from data.tasks import Tasks
+from data.submissions import Submissions
+from data.submission_results import SubmissionResults
+from data.task_tests import TaskTest
 from forms.news import NewsForm
 from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
