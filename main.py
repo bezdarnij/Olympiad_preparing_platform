@@ -177,7 +177,7 @@ def join_pvp(room):
 def pvp_room(room):
     if room not in matches or current_user.id not in matches[room]['players']:
         abort(403)
-    return render_template('') # cюда шаблончик бах
+    return render_template('Pvp.html') # cюда шаблончик бах
 
 @socketio.on('join')
 def on_join(data):
