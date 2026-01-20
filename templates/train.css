@@ -1,0 +1,34 @@
+.send {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  width: 700px;
+  margin-left: 30%;
+  margin-top: 4%;
+}
+h1 {
+  text-align: center;
+}
+input {
+  height: 25px;
+}
+
+.condition {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+.Input {
+      display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 500px;
+    margin-left: 15%;
+    margin-top: 8%;
+}
+.Table {
+      margin-left: 15%;
+    margin-top: 4%;
+}
