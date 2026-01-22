@@ -201,6 +201,8 @@ def pvp_room(room):
         file.save(os.path.join("uploads", filename))
 
         uid = str(current_user.id)
+        if uid not in matches[room]['completed']:
+            matches[room]['completed'][uid] = 0
         matches[room]['completed'][uid] += 1
         db_sess = db_session.create_session()
         scores = []
