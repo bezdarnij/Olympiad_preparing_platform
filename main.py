@@ -167,7 +167,6 @@ def create_pvp():
         'players': [current_user.id],
         'completed': {str(current_user.id): 0}
     }
-    print(matches)
     return redirect(f'/pvp/room/{room}')
 
 
@@ -183,9 +182,12 @@ def join_pvp(room):
     matches[room]['players'].append(current_user.id)
     matches[room]['completed'][str(current_user.id)] = 0
     session['room'] = room
-    print(matches)
     return redirect(f'/pvp/room/{room}')
 
+@app.route('/pvp', methods=["GET", "POST"])
+@login_required
+def pvp_choose():
+    return render_template('choose.html')
 
 @app.route('/pvp/room/<room>', methods=["GET", "POST"])
 @login_required
@@ -233,7 +235,6 @@ def on_join(data):
             name = user.name if user else "???"
             scores.append({'name': name, 'score': score})
         player_count = len(matches[room]['players'])
-        print(player_count)
         emit('update_scores', {
             'scores': scores,
             'player_count': player_count
@@ -256,7 +257,6 @@ def on_submit(data):
         scores.append({'name': name, 'score': score})
 
     player_count = len(matches[room]['players'])
-    print(player_count)
     emit('update_scores', {'scores': scores, 'player_count': player_count}, room=room)
 
 
