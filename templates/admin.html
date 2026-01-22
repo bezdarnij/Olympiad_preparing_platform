@@ -7,10 +7,29 @@
     <title>Admin</title>
   </head>
   <body>
-    <form action="" method="post">
-        <label for="post-name">
+    <form method="post">
+        <div class="label">
+            Название задачи
+            <input type="text" name="task_name">
             
-
-        </label>
+            Лимит памяти
+            <input type="text" name="memory_limit">
+            
+            Условие задачи
+            <textarea name="task_description" rows="5" cols="33"></textarea>
+            
+            Входные данные
+            <textarea name="input_data" rows="2" cols="15"></textarea>
+            
+            Выходные данные
+            <textarea name="output_data" rows="2" cols="15"></textarea>
+            
+            Примеры
+            <textarea name="examples" rows="2" cols="15"></textarea>
+        </div>
+        <div class="button">
+            <button type="submit">Отправить</button>
+        </div>
     </form>
   </body>
+</html>

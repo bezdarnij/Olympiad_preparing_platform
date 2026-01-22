@@ -1,0 +1,23 @@
+/* Очистка стандартных стилей и явное указание вертикального потока */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* или center, в зависимости от нужного выравнивания */
+  width: 100%;
+  max-width: 600px; /* ограничение ширины */
+  margin: 0 auto; /* центрирование */
+}
+
+.label > * {
+  width: 100%;
+  margin-bottom: 10px; /* отступы между элементами */
+}
+
+input, textarea {
+  box-sizing: border-box;
+}
