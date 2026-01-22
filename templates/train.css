@@ -1,24 +1,17 @@
-.task {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  text-align: center;
-  width: 700px;
-  margin-top: 300px;
-  margin-left: 30%;
-}
-h1,
-p {
-  text-align: center;
-}
-input {
-  height: 25px;
-}
-
 .send {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  text-align: center;
+  width: 700px;
+  margin-left: 30%;
+  margin-top: 4%;
+}
+h1 {
+  text-align: center;
+}
+input {
+  height: 25px;
 }
 
 .condition {
@@ -26,4 +19,16 @@ input {
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
+}
+.Input {
+      display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 500px;
+    margin-left: 15%;
+    margin-top: 8%;
+}
+.Table {
+      margin-left: 15%;
+    margin-top: 4%;
 }

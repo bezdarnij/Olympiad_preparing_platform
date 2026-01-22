@@ -15,6 +15,8 @@ from data.task_tests import TaskTest
 from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import uuid
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
@@ -25,12 +27,15 @@ login_manager.init_app(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 matches = {}
 
+
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
+
 db_session.global_init("db/task.db")
+
 
 @app.route("/")
 def index():
@@ -41,6 +46,7 @@ def index():
     else:
         news = db_sess.query(News).filter(News.is_private != True)
     return render_template("index.html", news=news)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
@@ -66,6 +72,7 @@ def reqister():
         return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -80,11 +87,13 @@ def login():
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
 
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect("/")
+
 
 @app.route('/news', methods=['GET', 'POST'])
 @login_required
@@ -102,6 +111,7 @@ def add_news():
         return redirect('/')
     return render_template('news.html', title='Добавление новости',
                            form=form)
+
 
 @app.route('/news/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -136,6 +146,7 @@ def edit_news(id):
                            form=form
                            )
 
+
 @app.route('/news_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 def news_delete(id):
@@ -160,7 +171,9 @@ def create_pvp():
         'players': [current_user.id],
         'completed': {str(current_user.id): 0}
     }
+    print(matches)
     return redirect(f'/pvp/room/{room}')
+
 
 @app.route('/pvp/join/<room>')
 @login_required
@@ -174,33 +187,80 @@ def join_pvp(room):
     matches[room]['players'].append(current_user.id)
     matches[room]['completed'][str(current_user.id)] = 0
     session['room'] = room
+    print(matches)
     return redirect(f'/pvp/room/{room}')
 
-@app.route('/pvp/room/<room>')
+
+@app.route('/pvp/room/<room>', methods=["GET", "POST"])
 @login_required
 def pvp_room(room):
     if room not in matches or current_user.id not in matches[room]['players']:
         abort(403)
-    return render_template('Pvp.html') # cюда шаблончик бах
+    if request.method == "POST":
+        file = request.files.get("file")
+        if not file or file.filename == "":
+            return "Файл не выбран"
+        filename = secure_filename(file.filename)
+        os.makedirs("uploads", exist_ok=True)
+        file.save(os.path.join("uploads", filename))
+
+        uid = str(current_user.id)
+        matches[room]['completed'][uid] += 1
+        db_sess = db_session.create_session()
+        scores = []
+        for user_id_str, score in matches[room]['completed'].items():
+            user = db_sess.query(User).get(int(user_id_str))
+            scores.append({
+                'name': user.name,
+                'score': score
+            })
+        player_count = len(matches[room]['players'])
+        print(player_count)
+        socketio.emit('update_scores', {'scores': scores, 'player_count': player_count}, room=room)
+        return redirect(f"/pvp/room/{room}")
+
+    return render_template('Pvp.html', room=room) # cюда шаблончик бах
+
 
 @socketio.on('join')
 def on_join(data):
     room = data['room']
     join_room(room)
-    emit('status', {'msg': f'{current_user.name} присоединился к комнате.'}, room=room)
+
+    if room in matches:
+        db_sess = db_session.create_session()
+        scores = []
+        for user_id_str, score in matches[room]['completed'].items():
+            user = db_sess.query(User).get(int(user_id_str))
+            name = user.name if user else "???"
+            scores.append({'name': name, 'score': score})
+        player_count = len(matches[room]['players'])
+        print(player_count)
+        emit('update_scores', {
+            'scores': scores,
+            'player_count': player_count
+        })
 
 @socketio.on('submit_code')
 def on_submit(data):
     room = data['room']
     if room not in matches:
         return
+    if current_user.id not in matches[room]['players']:
+        return
     uid = str(current_user.id)
-    if uid not in matches[room]['completed']:
-        matches[room]['completed'][uid] = 0
-    matches[room]['completed'][uid] += 1
-    emit('update_scores', {
-        'scores': matches[room]['completed']
-    }, room=room)
+    matches[room]['completed'][uid] = matches[room]['completed'].get(uid, 0) + 1
+    db_sess = db_session.create_session()
+    scores = []
+    for user_id_str, score in matches[room]['completed'].items():
+        user = db_sess.query(User).get(int(user_id_str))
+        name = user.name if user else "???"
+        scores.append({'name': name, 'score': score})
+
+    player_count = len(matches[room]['players'])
+    print(player_count)
+    emit('update_scores', {'scores': scores, 'player_count': player_count}, room=room)
+
 
 if __name__ == '__main__':
     socketio.run(app, port=8025, host='127.0.0.1', allow_unsafe_werkzeug=True)
