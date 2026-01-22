@@ -1,26 +1,50 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link href="style.css" rel="stylesheet" />
-		<title>PvP mode</title>
-	</head>
-	<body>
-		<h1>Режим PvP</h1>
-		<div class="condition">
-			<h2>Название задачи</h2>
-			<p>Условие задачи...</p>
-		</div>
-		<div class="task">
-			<form class="send" method="post" enctype="multipart/form-data">
-                <input type="file" name="file" required />
-                <button type="submit">Отправить решение</button>
-            </form>
-			<div>
-				<p>Соперник решил задач:</p>
-				<p>Ты решил задач:</p>
-			</div>
-		</div>
-	</body>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="style.css" rel="stylesheet"/>
+    <title>PvP mode</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+<h1>Режим PvP</h1>
+<div class="condition">
+    <h2>Название задачи</h2>
+    <p>Условие задачи...</p>
+</div>
+<div class="task">
+    <form id="sendForm" enctype="multipart/form-data">
+        <input type="file" name="file" id="file" required>
+        <button type="submit">Отправить</button>
+    </form>
+
+    <div>
+        <p>Соперник решил задач: <span id="opponent-score">0</span></p>
+        <p>Ты решил задач: <span id="your-score">0</span></p>
+        <p>количество пользователей в комнате <span id="player-count">0</span></p>
+    </div>
+</div>
+<script>
+    const socket = io();
+    const room = "{{ room }}";
+    const myName = "{{ current_user.name }}";
+    socket.emit('join', { room: room });
+    socket.on('update_scores', function(data) {
+        let yourScore = 0;
+        let opponentScore = 0;
+        for (let i = 0; i < data.scores.length; i++) {
+            if (data.scores[i].name === myName) {
+                yourScore = data.scores[i].score;
+            } else {
+                opponentScore = data.scores[i].score;
+            }
+        }
+        document.getElementById('your-score').textContent = yourScore;
+        document.getElementById('opponent-score').textContent = opponentScore;
+        document.getElementById('player-count').textContent = data.player_count;
+    });
+</script>
+</body>
 </html>
+
