@@ -1,0 +1,9 @@
+.choose {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 200px;
+  width: 30%;
+  margin-left: 35%;
+  margin-top: 15%;
+}
