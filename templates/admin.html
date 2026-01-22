@@ -1,35 +1,49 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="train.css" rel="stylesheet" />
     <title>Admin</title>
-  </head>
-  <body>
-    <form method="post">
-        <div class="label">
-            Название задачи
-            <input type="text" name="task_name">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Создание задачи</h1>
+        <form method="post" class="task-form">
+            <div class="form-group">
+                <label>Название задачи</label>
+                <input type="text" name="task_name">
+            </div>
             
-            Лимит памяти
-            <input type="text" name="memory_limit">
+            <div class="form-group">
+                <label>Лимит памяти</label>
+                <input type="text" name="memory_limit">
+            </div>
             
-            Условие задачи
-            <textarea name="task_description" rows="5" cols="33"></textarea>
+            <div class="form-group">
+                <label>Условие задачи</label>
+                <textarea name="task_description" rows="5"></textarea>
+            </div>
             
-            Входные данные
-            <textarea name="input_data" rows="2" cols="15"></textarea>
+            <div class="form-group">
+                <label>Входные данные</label>
+                <textarea name="input_data" rows="2"></textarea>
+            </div>
             
-            Выходные данные
-            <textarea name="output_data" rows="2" cols="15"></textarea>
+            <div class="form-group">
+                <label>Выходные данные</label>
+                <textarea name="output_data" rows="2"></textarea>
+            </div>
             
-            Примеры
-            <textarea name="examples" rows="2" cols="15"></textarea>
-        </div>
-        <div class="button">
-            <button type="submit">Отправить</button>
-        </div>
-    </form>
-  </body>
+            <div class="form-group">
+                <label>Примеры</label>
+                <textarea name="examples" rows="2"></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit">Отправить</button>
+            </div>
+        </form>
+    </div>
+</body>
 </html>
