@@ -16,7 +16,7 @@ from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import uuid
 import os
-from werkzeug.utils import secure_filename
+import subprocess
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
@@ -31,7 +31,7 @@ matches = {}
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
-    return db_sess.query(User).get(user_id)
+    return db_sess.get(User, user_id)
 
 
 db_session.global_init("db/task.db")
@@ -199,17 +199,37 @@ def pvp_room(room):
     if request.method == "POST":
         file = request.files.get("file")
         if not file or file.filename == "":
-            return "Файл не выбран"
-        filename = secure_filename(file.filename)
-        os.makedirs("uploads", exist_ok=True)
-        file.save(os.path.join("uploads", filename))
+            abort(400, "Файл не выбран")
+        file.filename = f"submission_{current_user.id}.py"
+        os.makedirs(f"submissions_{current_user.id}", exist_ok=True)
+        file.save(os.path.join(f"submissions_{current_user.id}", file.filename))
+
+        # judge
+        p = subprocess.Popen(
+            ["python", f"submission_{current_user.id}.py"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=f"submissions_{current_user.id}/"
+        )
+        out, err = p.communicate("1", timeout=1)
+        out = str(out)
+        print(out)
+        if err:
+            print(err)
+        else:
+            if out == "5":
+                print("OK")
+            else:
+                print("неверный ответ")
 
         uid = str(current_user.id)
         matches[room]['completed'][uid] += 1
         db_sess = db_session.create_session()
         scores = []
         for user_id_str, score in matches[room]['completed'].items():
-            user = db_sess.query(User).get(int(user_id_str))
+            user = db_sess.get(User, int(user_id_str))
             scores.append({
                 'name': user.name,
                 'score': score
@@ -231,7 +251,7 @@ def on_join(data):
         db_sess = db_session.create_session()
         scores = []
         for user_id_str, score in matches[room]['completed'].items():
-            user = db_sess.query(User).get(int(user_id_str))
+            user = db_sess.get(User, int(user_id_str))
             name = user.name if user else "???"
             scores.append({'name': name, 'score': score})
         player_count = len(matches[room]['players'])
@@ -263,4 +283,4 @@ def on_submit(data):
 
 
 if __name__ == '__main__':
-    socketio.run(app, port=8025, host='127.0.0.1', allow_unsafe_werkzeug=True)
+    socketio.run(app, port=8025, host='127.0.0.1', allow_unsafe_werkzeug=True, debug=True)
