@@ -8,10 +8,6 @@ from data.submissions import Submissions
 from data.submission_results import SubmissionResults
 from data.task_tests import TaskTest
 from forms.news import NewsForm
-from data.tasks import Tasks
-from data.submissions import Submissions
-from data.submission_results import SubmissionResults
-from data.task_tests import TaskTest
 from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import uuid
@@ -215,16 +211,19 @@ def pvp_room(room):
             text=True,
             cwd=f"submissions_{current_user.id}/"
         )
-        out, err = p.communicate("1", timeout=1)
-        out = str(out)
-        print(out)
-        if err:
-            print(err)
-        else:
-            if out == "5":
-                print("OK")
+        try:
+            out, err = p.communicate("1", timeout=1)
+            out = out.strip()
+            if err:
+                print(err)
             else:
-                print("неверный ответ")
+                if out == "5":
+                    print("OK")
+                else:
+                    print("неверный ответ")
+        except subprocess.TimeoutExpired:
+            print("Превышено максимальное время работы")
+            p.kill()
 
         uid = str(current_user.id)
         if uid not in matches[room]['completed']:
