@@ -7,15 +7,16 @@
     <title>Training</title>
   </head>
   <body>
-    <h1>Режим PvP</h1>
+    <h1>Режим тренировки</h1>
     <div class="condition">
-      <h2>Название задачи</h2>
-      <p>Лимит памяти</p>
-      <p>Условие задачи...</p>
+      <h2>{{ task.title }}</h2>
+      <p>{{ task.statement }}</p>
+      <p>Лимит времени: {{ task.time_limit }}</p>
+      <p>Лимит памяти: {{ task.memory_limit }}</p>
     </div>
     <div class="Input">
-      <p>Входные данные</p>
-      <p>Выходные данные</p>
+      <p>{{ task.input_format }}</p>
+      <p>{{ task.output_format }}</p>
       <p>Примеры</p>
     </div>
     <div class="Table">

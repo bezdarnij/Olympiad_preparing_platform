@@ -15,6 +15,7 @@ class Tasks(SqlAlchemyBase):
     input_format = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     output_format = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     memory_limit = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+    time_limit = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     difficulty = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     created_at = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)

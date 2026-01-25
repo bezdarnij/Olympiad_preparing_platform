@@ -189,18 +189,19 @@ def join_pvp(room):
 def pvp_choose():
     return render_template('choose.html')
 
-@app.route('/pvp/room/<room>', methods=["GET", "POST"])
+
+@app.route('/training', methods=["GET", "POST"])
 @login_required
-def pvp_room(room):
-    if room not in matches or current_user.id not in matches[room]['players']:
-        abort(403)
+def training():
+    db_sess = db_session.create_session()
+    task = db_sess.get(Tasks, 1)
     if request.method == "POST":
         file = request.files.get("file")
         if not file or file.filename == "":
             abort(400, "Файл не выбран")
         file.filename = f"submission_{current_user.id}.py"
-        os.makedirs(f"submissions_{current_user.id}", exist_ok=True)
-        file.save(os.path.join(f"submissions_{current_user.id}", file.filename))
+        os.makedirs(f"submissions_training/submissions_{current_user.id}", exist_ok=True)
+        file.save(os.path.join(f"submissions_training/submissions_{current_user.id}", file.filename))
 
         # judge
         p = subprocess.Popen(
@@ -209,10 +210,50 @@ def pvp_room(room):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            cwd=f"submissions_{current_user.id}/"
+            cwd=f"submissions_training/submissions_{current_user.id}/"
         )
         try:
-            out, err = p.communicate("1", timeout=1)
+            out, err = p.communicate("1", timeout=task.time_limit)
+            out = out.strip()
+            if err:
+                print(err)
+            else:
+                if out == "5":
+                    print("OK")
+                else:
+                    print("неверный ответ")
+        except subprocess.TimeoutExpired:
+            print("Превышено максимальное время работы")
+            p.kill()
+    return render_template('training.html', task=task)
+
+
+@app.route('/pvp/room/<room>', methods=["GET", "POST"])
+@login_required
+def pvp_room(room):
+    if room not in matches or current_user.id not in matches[room]['players']:
+        abort(403)
+    db_sess = db_session.create_session()
+    task = db_sess.get(Tasks, 1)
+    if request.method == "POST":
+        file = request.files.get("file")
+        if not file or file.filename == "":
+            abort(400, "Файл не выбран")
+        file.filename = f"submission_{current_user.id}.py"
+        os.makedirs(f"submissions_pvp/submissions_{current_user.id}", exist_ok=True)
+        file.save(os.path.join(f"submissions_pvp/submissions_{current_user.id}", file.filename))
+
+        # judge
+        p = subprocess.Popen(
+            ["python", f"submission_{current_user.id}.py"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=f"submissions_pvp/submissions_{current_user.id}/"
+        )
+        try:
+            out, err = p.communicate("1", timeout=task.time_limit)
             out = out.strip()
             if err:
                 print(err)
