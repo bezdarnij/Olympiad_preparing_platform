@@ -12,8 +12,8 @@
 			<nav class="navbar navbar-light bg-light">
 				<a class="navbar-brand" href="/">Наше приложение</a>
 				{% if current_user.is_authenticated %}
-                <a class="navbar-brand" href="/pvp">Pvp режим</a>
-                <a class="navbar-brand" href="/training">Режим тренировки</a>
+				<a class="navbar-brand" href="/pvp">Pvp режим</a>
+				<a class="navbar-brand" href="/training">Режим тренировки</a>
 				<a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
 				{% else %}
 				<p>
@@ -30,9 +30,14 @@
 			<p>Условие задачи...</p>
 		</div>
 		<div class="task">
-			<form class="send" method="post" enctype="multipart/form-data">
+			<form
+				class="send"
+				method="post"
+				enctype="multipart/form-data"
+				id="uploadForm"
+			>
 				<input type="file" accept=".py" name="file" id="pythonFile" required />
-				<button type="submit">Отправить</button>
+				<button type="submit" id="submitBtn">Отправить</button>
 			</form>
 
 			<div>
@@ -62,7 +67,38 @@
 				document.getElementById('opponent-score').textContent = opponentScore
 				document.getElementById('player-count').textContent = data.player_count
 			})
+
+			document
+				.getElementById('uploadForm')
+				.addEventListener('submit', function (event) {
+					const fileInput = document.getElementById('pythonFile')
+
+					// Проверяем, выбран ли файл
+					if (!fileInput.files || fileInput.files.length === 0) {
+						event.preventDefault()
+						alert('Пожалуйста, выберите файл.')
+						return false
+					}
+
+					const file = fileInput.files[0]
+					const fileName = file.name
+					const fileExtension = fileName.split('.').pop().toLowerCase()
+
+					if (fileExtension !== 'py') {
+						event.preventDefault()
+						alert('Допускаются только файлы с расширением .py')
+						return false
+					}
+
+					if (file.size > 1024 * 1024) {
+						// 1MB
+						event.preventDefault()
+						alert('Файл слишком большой. Максимальный размер: 1MB')
+						return false
+					}
+
+					return true
+				})
 		</script>
-	    <script src="script.js"></script>
 	</body>
 </html>
