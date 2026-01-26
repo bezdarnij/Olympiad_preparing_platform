@@ -31,7 +31,7 @@
 		</div>
 		<div class="task">
 			<form class="send" method="post" enctype="multipart/form-data">
-				<input type="file" name="file" id="file" required />
+				<input type="file" accept=".py" name="file" id="pythonFile" required />
 				<button type="submit">Отправить</button>
 			</form>
 
@@ -63,5 +63,6 @@
 				document.getElementById('player-count').textContent = data.player_count
 			})
 		</script>
+	    <script src="script.js"></script>
 	</body>
 </html>
