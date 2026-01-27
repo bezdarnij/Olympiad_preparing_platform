@@ -26,8 +26,27 @@
 		<h1>Режим PvP</h1>
 		<p>id комнаты:</p>
 		<div class="condition">
-			<h2>Название задачи</h2>
-			<p>Условие задачи...</p>
+		  <h2>{{ task.title }}</h2>
+		  <p>{{ task.statement }}</p>
+		  <p>Лимит времени: {{ task.time_limit }}</p>
+		  <p>Лимит памяти: {{ task.memory_limit }}</p>
+		</div>
+		<div class="Input">
+		  <p>{{ task.input_format }}</p>
+		  <p>{{ task.output_format }}</p>
+		  <p>Примеры</p>
+		</div>
+		<div class="Table">
+		  <table>
+			<tr>
+			  <th> input </th>
+			  <th> output </th>
+			</tr>
+			<tr>
+			  <th> {{ test.input_data }} </th>
+			  <th> {{ test.output }} </th>
+			</tr>
+		  </table>
 		</div>
 		<div class="task">
 			<form
