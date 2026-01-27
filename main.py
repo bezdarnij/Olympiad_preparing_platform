@@ -288,19 +288,8 @@ def pvp_room(room):
         if uid not in matches[room]['completed']:
             matches[room]['completed'][uid] = 0
         matches[room]['completed'][uid] += 1
-        db_sess = db_session.create_session()
-        scores = []
-        for user_id_str, score in matches[room]['completed'].items():
-            user = db_sess.get(User, int(user_id_str))
-            scores.append({
-                'name': user.name,
-                'score': score
-            })
-        player_count = len(matches[room]['players'])
-        print(player_count)
-        socketio.emit('update_scores', {'scores': scores, 'player_count': player_count}, room=room)
-        return redirect(f"/pvp/room/{room}")
 
+        return redirect(f"/pvp/room/{room}")
     return render_template('Pvp.html', room=room, task=task, test=task_test[0]) # cюда шаблончик бах
 
 
