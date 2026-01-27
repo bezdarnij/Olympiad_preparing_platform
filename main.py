@@ -1,6 +1,5 @@
 from flask import Flask, render_template, redirect, request, abort, session
 from data import db_session
-from data.news import News
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.users import User
 from data.tasks import Tasks
@@ -34,13 +33,7 @@ db_session.global_init("db/task.db")
 
 @app.route("/")
 def index():
-    db_sess = db_session.create_session()
-    if current_user.is_authenticated:
-        news = db_sess.query(News).filter(
-            (News.user == current_user) | (News.is_private != True))
-    else:
-        news = db_sess.query(News).filter(News.is_private != True)
-    return render_template("index.html", news=news)
+    return render_template("index.html")
 
 
 @app.route('/register', methods=['GET', 'POST'])

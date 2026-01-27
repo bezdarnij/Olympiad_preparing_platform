@@ -20,7 +20,6 @@ class User(SqlAlchemyBase, UserMixin):
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
 
-    news = orm.relationship("News", back_populates='user')
     submissions = orm.relationship("Submissions", back_populates="user")
 
     def set_password(self, password):
