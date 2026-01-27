@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Каталог задач</h1>
+{% if tasks %}
+    {% for task in tasks %}
+    <div class="col-md-6 border rounded" style="margin-bottom: 20px;">
+        <h2>{{ task.title }}</h2>
+        <p>Сложность: {{ task.difficulty or 'Не указана' }}</p>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>Задачи отсутствуют.</p>
+{% endif %}
+{% endblock %}
