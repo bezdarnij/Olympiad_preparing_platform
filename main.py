@@ -192,13 +192,6 @@ def join_pvp(room):
     session['room'] = room
     return redirect(f'/pvp/room/{room}')
 
-@app.route('/tasks')
-@login_required
-def tasks_list():
-    db_sess = db_session.create_session()
-    tasks = db_sess.query(Tasks).all()
-    return render_template('tasks.html', tasks=tasks)
-
 @app.route('/pvp', methods=["GET", "POST"])
 @login_required
 def pvp_choose():
