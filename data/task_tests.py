@@ -10,5 +10,6 @@ class TaskTest(SqlAlchemyBase):
                            primary_key=True, autoincrement=True)
     task_id = sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey("tasks.id"))
-    test_path = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    input_data = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    output = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     tasks = orm.relationship("Tasks", back_populates='task_tests')
