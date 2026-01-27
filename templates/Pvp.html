@@ -8,16 +8,55 @@
 		<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 	</head>
 	<body>
+		<header>
+			<nav class="navbar navbar-light bg-light">
+				<a class="navbar-brand" href="/">Наше приложение</a>
+				{% if current_user.is_authenticated %}
+				<a class="navbar-brand" href="/pvp">Pvp режим</a>
+				<a class="navbar-brand" href="/training">Режим тренировки</a>
+				<a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+				{% else %}
+				<p>
+					<a class="btn btn-primary" href="/register">Зарегистрироваться</a>
+					<a class="btn btn-success" href="/login">Войти</a>
+				</p>
+				{% endif %}
+			</nav>
+		</header>
 		<h1>Режим PvP</h1>
-		<p>id комнаты:</p>
+		<p><strong>ID комнаты:</strong> {{ room }}</p>
 		<div class="condition">
-			<h2>Название задачи</h2>
-			<p>Условие задачи...</p>
+		  <h2>{{ task.title }}</h2>
+		  <p>{{ task.statement }}</p>
+		  <p>Лимит времени: {{ task.time_limit }}</p>
+		  <p>Лимит памяти: {{ task.memory_limit }}</p>
+		</div>
+		<div class="Input">
+		  <p>{{ task.input_format }}</p>
+		  <p>{{ task.output_format }}</p>
+		  <p>Примеры</p>
+		</div>
+		<div class="Table">
+		  <table>
+			<tr>
+			  <th> input </th>
+			  <th> output </th>
+			</tr>
+			<tr>
+			  <th> {{ test.input_data }} </th>
+			  <th> {{ test.output }} </th>
+			</tr>
+		  </table>
 		</div>
 		<div class="task">
-			<form class="send" method="post" enctype="multipart/form-data">
-				<input type="file" name="file" id="file" required />
-				<button type="submit">Отправить</button>
+			<form
+				class="send"
+				method="post"
+				enctype="multipart/form-data"
+				id="uploadForm"
+			>
+				<input type="file" accept=".py" name="file" id="pythonFile" required />
+				<button type="submit" id="submitBtn">Отправить</button>
 			</form>
 
 			<div>
@@ -47,6 +86,38 @@
 				document.getElementById('opponent-score').textContent = opponentScore
 				document.getElementById('player-count').textContent = data.player_count
 			})
+
+			document
+				.getElementById('uploadForm')
+				.addEventListener('submit', function (event) {
+					const fileInput = document.getElementById('pythonFile')
+
+					// Проверяем, выбран ли файл
+					if (!fileInput.files || fileInput.files.length === 0) {
+						event.preventDefault()
+						alert('Пожалуйста, выберите файл.')
+						return false
+					}
+
+					const file = fileInput.files[0]
+					const fileName = file.name
+					const fileExtension = fileName.split('.').pop().toLowerCase()
+
+					if (fileExtension !== 'py') {
+						event.preventDefault()
+						alert('Допускаются только файлы с расширением .py')
+						return false
+					}
+
+					if (file.size > 1024 * 1024) {
+						// 1MB
+						event.preventDefault()
+						alert('Файл слишком большой. Максимальный размер: 1MB')
+						return false
+					}
+
+					return true
+				})
 		</script>
 	</body>
 </html>

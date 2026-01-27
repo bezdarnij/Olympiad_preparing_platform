@@ -7,15 +7,31 @@
     <title>Training</title>
   </head>
   <body>
-    <h1>Режим PvP</h1>
+	  <header>
+			<nav class="navbar navbar-light bg-light">
+				<a class="navbar-brand" href="/">Наше приложение</a>
+				{% if current_user.is_authenticated %}
+                <a class="navbar-brand" href="/pvp">Pvp режим</a>
+                <a class="navbar-brand" href="/training">Режим тренировки</a>
+				<a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+				{% else %}
+				<p>
+					<a class="btn btn-primary" href="/register">Зарегистрироваться</a>
+					<a class="btn btn-success" href="/login">Войти</a>
+				</p>
+				{% endif %}
+			</nav>
+		</header>
+    <h1>Режим тренировки</h1>
     <div class="condition">
-      <h2>Название задачи</h2>
-      <p>Лимит памяти</p>
-      <p>Условие задачи...</p>
+      <h2>{{ task.title }}</h2>
+      <p>{{ task.statement }}</p>
+      <p>Лимит времени: {{ task.time_limit }}</p>
+      <p>Лимит памяти: {{ task.memory_limit }}</p>
     </div>
     <div class="Input">
-      <p>Входные данные</p>
-      <p>Выходные данные</p>
+      <p>{{ task.input_format }}</p>
+      <p>{{ task.output_format }}</p>
       <p>Примеры</p>
     </div>
     <div class="Table">
@@ -25,12 +41,8 @@
           <th> output </th>
         </tr>
         <tr>
-          <th> 1 2 </th>
-          <th> 1 2 </th>
-        </tr>
-        <tr>
-          <th> 3 4 </th>
-          <th> 3 4 </th>
+          <th> {{ test.input_data }} </th>
+          <th> {{ test.output }} </th>
         </tr>
       </table>
     </div>

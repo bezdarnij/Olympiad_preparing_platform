@@ -7,6 +7,21 @@
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body>
+		<header>
+			<nav class="navbar navbar-light bg-light">
+				<a class="navbar-brand" href="/">Наше приложение</a>
+				{% if current_user.is_authenticated %}
+                <a class="navbar-brand" href="/pvp">Pvp режим</a>
+                <a class="navbar-brand" href="/training">Режим тренировки</a>
+				<a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+				{% else %}
+				<p>
+					<a class="btn btn-primary" href="/register">Зарегистрироваться</a>
+					<a class="btn btn-success" href="/login">Войти</a>
+				</p>
+				{% endif %}
+			</nav>
+		</header>
 		<div class="container">
 			<h1>Создание задачи</h1>
 			<form method="post" class="task-form">
