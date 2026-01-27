@@ -193,8 +193,10 @@ def pvp_choose():
 @app.route('/training', methods=["GET", "POST"])
 @login_required
 def training():
+    task_id = 1
     db_sess = db_session.create_session()
-    task = db_sess.get(Tasks, 1)
+    task = db_sess.get(Tasks, task_id)
+    task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
     if request.method == "POST":
         file = request.files.get("file")
         if not file or file.filename == "":
@@ -204,28 +206,33 @@ def training():
         file.save(os.path.join(f"submissions_training/submissions_{current_user.id}", file.filename))
 
         # judge
-        p = subprocess.Popen(
-            ["python", f"submission_{current_user.id}.py"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            cwd=f"submissions_training/submissions_{current_user.id}/"
-        )
-        try:
-            out, err = p.communicate("1", timeout=task.time_limit)
-            out = out.strip()
-            if err:
-                print(err)
-            else:
-                if out == "5":
-                    print("OK")
+        test_passed = 0
+        for test in task_test:
+            p = subprocess.Popen(
+                ["python", f"submission_{current_user.id}.py"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=f"submissions_training/submissions_{current_user.id}/"
+            )
+            try:
+                out, err = p.communicate(test.input_data, timeout=task.time_limit)
+                out = out.strip()
+                if err:
+                    print(err)
                 else:
-                    print("неверный ответ")
-        except subprocess.TimeoutExpired:
-            print("Превышено максимальное время работы")
-            p.kill()
-    return render_template('training.html', task=task)
+                    if out == test.output.strip():
+                        test_passed += 1
+            except subprocess.TimeoutExpired:
+                print("Превышено максимальное время работы")
+                p.kill()
+        print(f"Пройдено тестов: {test_passed}")
+        if test_passed == 5:
+            print("OK")
+        else:
+            print("неверный ответ")
+    return render_template('training.html', task=task, test=task_test[0])
 
 
 @app.route('/pvp/room/<room>', methods=["GET", "POST"])
@@ -233,8 +240,10 @@ def training():
 def pvp_room(room):
     if room not in matches or current_user.id not in matches[room]['players']:
         abort(403)
+    task_id = 1
     db_sess = db_session.create_session()
-    task = db_sess.get(Tasks, 1)
+    task = db_sess.get(Tasks, task_id)
+    task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
     if request.method == "POST":
         file = request.files.get("file")
         if not file or file.filename == "":
@@ -244,27 +253,32 @@ def pvp_room(room):
         file.save(os.path.join(f"submissions_pvp/submissions_{current_user.id}", file.filename))
 
         # judge
-        p = subprocess.Popen(
-            ["python", f"submission_{current_user.id}.py"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            cwd=f"submissions_pvp/submissions_{current_user.id}/"
-        )
-        try:
-            out, err = p.communicate("1", timeout=task.time_limit)
-            out = out.strip()
-            if err:
-                print(err)
-            else:
-                if out == "5":
-                    print("OK")
+        test_passed = 0
+        for test in task_test:
+            p = subprocess.Popen(
+                ["python", f"submission_{current_user.id}.py"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=f"submissions_pvp/submissions_{current_user.id}/"
+            )
+            try:
+                out, err = p.communicate(test.input_data, timeout=task.time_limit)
+                out = out.strip()
+                if err:
+                    print(err)
                 else:
-                    print("неверный ответ")
-        except subprocess.TimeoutExpired:
-            print("Превышено максимальное время работы")
-            p.kill()
+                    if out == test.output.strip():
+                        test_passed += 1
+            except subprocess.TimeoutExpired:
+                print("Превышено максимальное время работы")
+                p.kill()
+        print(f"Пройдено тестов: {test_passed}")
+        if test_passed == 5:
+            print("OK")
+        else:
+            print("неверный ответ")
 
         uid = str(current_user.id)
         if uid not in matches[room]['completed']:
@@ -283,7 +297,7 @@ def pvp_room(room):
         socketio.emit('update_scores', {'scores': scores, 'player_count': player_count}, room=room)
         return redirect(f"/pvp/room/{room}")
 
-    return render_template('Pvp.html', room=room) # cюда шаблончик бах
+    return render_template('Pvp.html', room=room, task=task, test=task_test[0]) # cюда шаблончик бах
 
 
 @socketio.on('join')
