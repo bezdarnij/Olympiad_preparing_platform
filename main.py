@@ -158,6 +158,14 @@ def news_delete(id):
     return redirect('/')
 
 
+@app.route('/tasks')
+@login_required
+def tasks_list():
+    db_sess = db_session.create_session()
+    tasks = db_sess.query(Tasks).all()
+    return render_template('tasks.html', tasks=tasks)
+
+
 @app.route('/pvp/create')
 @login_required
 def create_pvp():
