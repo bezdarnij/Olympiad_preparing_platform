@@ -117,6 +117,7 @@ def join_pvp(room):
     session['room'] = room
     return redirect(f'/pvp/room/{room}')
 
+
 @app.route('/pvp', methods=["GET", "POST"])
 @login_required
 def pvp_choose():
@@ -218,49 +219,92 @@ def pvp_room(room):
             print("неверный ответ")
 
         uid = str(current_user.id)
-        if uid not in matches[room]['completed']:
-            matches[room]['completed'][uid] = 0
-        matches[room]['completed'][uid] += 1
+        matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), test_passed)
+        if len(matches[room]['completed']) == 2 and not matches[room].get('finished'):
+            result = finish_match(room)
+            socketio.emit('match_finished', {'result': result}, room=room)
+
         return redirect(f"/pvp/room/{room}")
-    return render_template('Pvp.html', room=room, task=task, test=task_test[0]) # cюда шаблончик бах
+    players_info = []
+    for uid_str in matches[room]['players']:
+        user = db_sess.get(User, int(uid_str))
+        players_info.append({'name': user.name, 'elo': user.elo_rating})
+
+    return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info)
+
+
+def finish_match(room):
+    db_sess = db_session.create_session()
+    players = matches[room]['players']
+    completed = matches[room]['completed']
+
+    user1_id, user2_id = players
+    user1 = db_sess.get(User, user1_id)
+    user2 = db_sess.get(User, user2_id)
+
+    score1 = completed.get(str(user1_id), 0)
+    score2 = completed.get(str(user2_id), 0)
+    from elo import update_elo
+    if score1 > score2:
+        user1.elo_rating, user2.elo_rating = update_elo(user1.elo_rating, user2.elo_rating)
+        result = f"{user1.name} победил"
+    elif score2 > score1:
+        user2.elo_rating, user1.elo_rating = update_elo(user2.elo_rating, user1.elo_rating)
+        result = f"{user2.name} победил"
+    else:
+        user1.elo_rating, user2.elo_rating = update_elo(user1.elo_rating, user2.elo_rating, draw=True)
+        result = "Ничья"
+
+    db_sess.commit()
+    matches[room]['finished'] = True
+    matches[room]['result'] = result
+    return result
 
 
 @socketio.on('join')
 def on_join(data):
     room = data['room']
     join_room(room)
+    if room not in matches:
+        return
 
-    if room in matches:
-        db_sess = db_session.create_session()
-        scores = []
-        for user_id_str, score in matches[room]['completed'].items():
-            user = db_sess.get(User, int(user_id_str))
-            name = user.name if user else "???"
-            scores.append({'name': name, 'score': score})
-        player_count = len(matches[room]['players'])
-        emit('update_scores', {
-            'scores': scores,
-            'player_count': player_count
+    db_sess = db_session.create_session()
+    scores = []
+    for user_id_str, score in matches[room]['completed'].items():
+        user = db_sess.get(User, int(user_id_str))
+        scores.append({
+            'name': user.name if user else "???",
+            'score': score,
+            'elo': user.elo_rating if user else 1000
         })
+    emit('update_scores',
+         {'scores': scores,
+          'player_count': len(matches[room]['players'])},
+         room=room)
+
 
 @socketio.on('submit_code')
 def on_submit(data):
     room = data['room']
-    if room not in matches:
+    if room not in matches or current_user.id not in matches[room]['players']:
         return
-    if current_user.id not in matches[room]['players']:
-        return
+
     uid = str(current_user.id)
-    matches[room]['completed'][uid] = matches[room]['completed'].get(uid, 0) + 1
+    matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), data.get('test_passed', 0))
+
     db_sess = db_session.create_session()
     scores = []
     for user_id_str, score in matches[room]['completed'].items():
-        user = db_sess.query(User).get(int(user_id_str))
-        name = user.name if user else "???"
-        scores.append({'name': name, 'score': score})
-
-    player_count = len(matches[room]['players'])
-    emit('update_scores', {'scores': scores, 'player_count': player_count}, room=room)
+        user = db_sess.get(User, int(user_id_str))
+        scores.append({
+            'name': user.name if user else "???",
+            'score': score,
+            'elo': user.elo_rating if user else 1000
+        })
+    emit('update_scores', {'scores': scores, 'player_count': len(matches[room]['players'])}, room=room)
+    if len(matches[room]['completed']) == 2 and not matches[room].get('finished'):
+        result = finish_match(room)
+        emit('match_finished', {'result': result}, room=room)
 
 
 if __name__ == '__main__':
