@@ -1,5 +1,6 @@
 {% extends "base.html" %} {% block content %} {% if
 current_user.is_authenticated %}
+<a href="/tasks" class="btn btn-secondary">Каталог задач</a>
 <a href="news" class="btn btn-secondary">Добавить новость</a>
 {% endif %}
 <h1>Записи в блоге</h1>
