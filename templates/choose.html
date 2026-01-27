@@ -26,7 +26,19 @@
 			<a class="btn btn-success" href="/pvp/create">Создать комнату</a>
 			<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 			<button>войти по коду</button>
-			<p>Список комнат:</p>
+			<p>Список комнат ({{ rooms|length }}):</p>
+			{% if rooms %}
+            <ul>
+            {% for room_id in rooms %}
+                <li>
+                    Комната: {{ room_id }}
+                    <a href="/pvp/join/{{ room_id }}">Присоединиться</a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>Нет активных комнат <a href="/pvp/create">Создайте первую</a></p>
+        {% endif %}
 		</div>
 	</body>
 </html>

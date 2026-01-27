@@ -187,7 +187,11 @@ def join_pvp(room):
 @app.route('/pvp', methods=["GET", "POST"])
 @login_required
 def pvp_choose():
-    return render_template('choose.html')
+    open_rooms = []
+    for room_id, info in matches.items():
+        if len(info['players']) < 2:
+            open_rooms.append(room_id)
+    return render_template('choose.html', rooms=open_rooms)
 
 
 @app.route('/training', methods=["GET", "POST"])
