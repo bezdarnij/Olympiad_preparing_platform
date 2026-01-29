@@ -2,6 +2,14 @@
 
 {% block content %}
 <h1>Каталог задач</h1>
+<form method="get" action="/tasks">
+    Сортировать по<br />
+    <select name="sort_by">
+        <option value="difficulty">Сложности</option>
+        <option value="theme">Темe</option>
+    </select>
+    <button type="submit" class="btn btn-secondary">Сортировать</button>
+</form>
 {% if tasks %}
     {% for task in tasks %}
     <div class="col-md-6 border rounded" style="margin-bottom: 20px;">
