@@ -176,36 +176,43 @@ def training():
 @app.route('/pvp/room/<room>', methods=["GET", "POST"])
 @login_required
 def pvp_room(room):
-    if room not in matches or current_user.id not in matches[room]['players']:
-        abort(403)
     task_id = 1
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
+    submission = db_sess.query(Submissions).filter(Submissions.task_id == task.id).all()
+    submission_id = len(submission) + 1
     if request.method == "POST":
         file = request.files.get("file")
         if not file or file.filename == "":
             abort(400, "Файл не выбран")
-        file.filename = f"submission_{current_user.id}.py"
-        os.makedirs(f"submissions_pvp/submissions_{current_user.id}", exist_ok=True)
-        file.save(os.path.join(f"submissions_pvp/submissions_{current_user.id}", file.filename))
+        file.filename = f"submission_{submission_id}.py"
+        os.makedirs(f"submissions_pvp/submissions_{current_user.id}/task_{task_id}", exist_ok=True)
+        file.save(os.path.join(f"submissions_pvp/submissions_{current_user.id}/task_{task_id}", file.filename))
 
         # judge
         test_passed = 0
+        f_err = 0
         for test in task_test:
             p = subprocess.Popen(
-                ["python", f"submission_{current_user.id}.py"],
+                ["python", f"submission_{submission_id}.py"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                cwd=f"submissions_pvp/submissions_{current_user.id}/"
+                cwd=f"submissions_pvp/submissions_{current_user.id}/task_{task_id}"
             )
             try:
                 out, err = p.communicate(test.input_data, timeout=task.time_limit)
                 out = out.strip()
                 if err:
                     print(err)
+                    submission_result = SubmissionResults(
+                        submission_id=submission_id,
+                        verdict=err,
+                        total_tests=test_passed,
+                    )
+                    f_err = 1
                 else:
                     if out == test.output.strip():
                         test_passed += 1
@@ -213,10 +220,27 @@ def pvp_room(room):
                 print("Превышено максимальное время работы")
                 p.kill()
         print(f"Пройдено тестов: {test_passed}")
+        submissions = Submissions(
+            user_id=current_user.id,
+            task_id=task_id,
+        )
         if test_passed == 5:
             print("OK")
-        else:
+            submission_result = SubmissionResults(
+                submission_id=submission_id,
+                verdict="OK",
+                total_tests=test_passed,
+            )
+        elif f_err == 0:
             print("неверный ответ")
+            submission_result = SubmissionResults(
+                submission_id=submission_id,
+                verdict="Частичное решение",
+                total_tests=test_passed,
+            )
+        db_sess.add(submissions)
+        db_sess.add(submission_result)
+        db_sess.commit()
 
         uid = str(current_user.id)
         matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), test_passed)
@@ -229,8 +253,29 @@ def pvp_room(room):
     for uid_str in matches[room]['players']:
         user = db_sess.get(User, int(uid_str))
         players_info.append({'name': user.name, 'elo': user.elo_rating})
+    last_submission = (
+        db_sess.query(Submissions)
+        .filter(
+            Submissions.user_id == current_user.id,
+            Submissions.task_id == task_id
+        )
+        .order_by(Submissions.id.desc())
+        .first()
+    )
 
-    return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info)
+    if last_submission:
+        last_result = (
+            db_sess.query(SubmissionResults)
+            .filter(SubmissionResults.submission_id == last_submission.id)
+            .first()
+        )
+        if last_result:
+            verdict = last_result.verdict
+        else:
+            verdict = "Результат не найден"
+    else:
+        verdict = "Нет сданных решений"
+    return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info, verdict=verdict)
 
 
 def finish_match(room):
