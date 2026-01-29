@@ -29,6 +29,13 @@ h1 {
   margin-bottom: 5px;
 }
 
+fieldset{
+  width: 80%; 
+  height: auto; 
+  min-height: 150px; 
+  padding: 20px;
+}
+
 input[type="text"],
 input[type="number"],
 textarea {
@@ -37,6 +44,8 @@ textarea {
   padding: 8px;
   border: 1px solid #ccc;
 }
+
+
 
 textarea {
   resize: vertical;
