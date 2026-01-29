@@ -1,0 +1,140 @@
+/* ===== Общие стили страницы ===== */
+.page-content h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #1e3a8a;
+}
+
+/* ===== ID комнаты ===== */
+.page-content p strong {
+    color: #111827;
+}
+
+/* ===== Блок задачи ===== */
+.condition {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.condition h2 {
+    margin-bottom: 12px;
+    color: #2563eb;
+}
+
+.condition p {
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+/* ===== Input / Output блок ===== */
+.Input {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.Input p {
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+/* ===== Примеры Input/Output ===== */
+.examples {
+    max-width: 900px;
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.example {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.example pre {
+    background: #f3f4f6;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-family: Consolas, monospace;
+}
+
+/* ===== Вердикт ===== */
+.page-content p {
+    max-width: 900px;
+    margin: 10px auto;
+    font-size: 15px;
+}
+
+/* ===== Форма отправки ===== */
+.task {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.send {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.send button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.send button:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+
+/* ===== Блок очков ===== */
+.scores {
+    margin-top: 12px;
+    font-size: 15px;
+}
+
+.scores p {
+    margin-bottom: 6px;
+}
+
+/* ===== Адаптив ===== */
+@media (max-width: 900px) {
+    .examples {
+        grid-template-columns: 1fr;
+    }
+
+    .send {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .send button {
+        width: 100%;
+    }
+}

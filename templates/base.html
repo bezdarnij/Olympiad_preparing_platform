@@ -1,37 +1,42 @@
 <!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1, shrink-to-fit=no"
-		/>
-		<link
-			rel="stylesheet"
-			href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-			integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-			crossorigin="anonymous"
-		/>
-		<title>{{title}}</title>
-	</head>
-	<body>
-		<header>
-			<nav class="navbar navbar-light bg-light">
-				<a class="navbar-brand" href="/">Наше приложение</a>
-				{% if current_user.is_authenticated %}
-                <a class="navbar-brand" href="/pvp">Pvp режим</a>
-                <a class="navbar-brand" href="/training">Режим тренировки</a>
-				<a class="navbar-brand" href="/admin">Админ панель</a>
-				<a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
-				{% else %}
-				<p>
-					<a class="btn btn-primary" href="/register">Зарегистрироваться</a>
-					<a class="btn btn-success" href="/login">Войти</a>
-				</p>
-				{% endif %}
-			</nav>
-		</header>
-		<!-- Begin page content -->
-		<main role="main" class="container">{% block content %}{% endblock %}</main>
-	</body>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Наше приложение{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+
+    {% block styles %}{% endblock %}
+</head>
+<body>
+
+<header class="site-header">
+    <nav class="navbar">
+        <div class="nav-left">
+            <a class="logo" href="/">🚀 AlgoTrain</a>
+        </div>
+
+        <div class="nav-right">
+            {% if current_user.is_authenticated %}
+                <a class="nav-link" href="/training">Тренировка</a>
+                <a class="nav-link" href="/pvp">PvP</a>
+
+                <div class="user-menu">
+                    <span class="username">{{ current_user.name }}</span>
+                    <a class="logout" href="/logout">Выйти</a>
+                </div>
+            {% else %}
+                <a class="btn btn-outline" href="/login">Войти</a>
+                <a class="btn btn-primary" href="/register">Регистрация</a>
+            {% endif %}
+        </div>
+    </nav>
+</header>
+
+<main class="page-content">
+    {% block content %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
 </html>
