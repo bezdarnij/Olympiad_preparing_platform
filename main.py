@@ -85,9 +85,17 @@ def logout():
 
 @app.route('/tasks')
 @login_required
-def tasks_list():
+def tasks():
     db_sess = db_session.create_session()
-    tasks = db_sess.query(Tasks).all()
+    sort_by = request.args.get('sort_by')
+
+    if sort_by == 'difficulty':
+        tasks = db_sess.query(Tasks).order_by(Tasks.difficulty).all()
+    elif sort_by == 'theme':
+        tasks = db_sess.query(Tasks).all()
+    else:
+        tasks = db_sess.query(Tasks).all()
+
     return render_template('tasks.html', tasks=tasks)
 
 
