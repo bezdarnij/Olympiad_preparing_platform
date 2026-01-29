@@ -49,6 +49,9 @@
 		  </table>
 		</div>
         <p>Вердикт: {{ verdict }}</p>
+		{% if test_passed %}
+			<p>Пройдено тестов: {{ test_passed }}</p>
+		{% endif %}
 		<div class="task">
 			<form
 				class="send"
