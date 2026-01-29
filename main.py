@@ -91,6 +91,14 @@ def tasks_list():
     return render_template('tasks.html', tasks=tasks)
 
 
+@app.route('/admin', methods=["GET", "POST"])
+@login_required
+def admin():
+    db_sess = db_session.create_session()
+    users = db_sess.query(User)
+    return render_template("admin_first.html", users=users)
+
+
 @app.route('/pvp/create')
 @login_required
 def create_pvp():
