@@ -4,7 +4,6 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from data.users import User
 from data.tasks import Tasks
 from data.submissions import Submissions
-from data.submission_results import SubmissionResults
 from data.task_tests import TaskTest
 from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
@@ -52,7 +51,6 @@ def reqister():
         user = User(
             name=form.name.data,
             email=form.email.data,
-            about=form.about.data
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -144,6 +142,7 @@ def pvp_choose():
     return render_template('choose.html', rooms=open_rooms)
 
 
+
 @app.route('/training', methods=["GET", "POST"])
 @login_required
 def training():
@@ -178,8 +177,9 @@ def training():
                 out = out.strip()
                 if err:
                     print(err)
-                    submission_result = SubmissionResults(
-                        submission_id=submission_id,
+                    submission_result = Submissions(
+                        user_id=current_user.id,
+                        task_id=task_id,
                         verdict=err,
                         total_tests=test_passed,
                     )
@@ -191,31 +191,27 @@ def training():
                 print("Превышено максимальное время работы")
                 p.kill()
         print(f"Пройдено тестов: {test_passed}")
-        submissions = Submissions(
-            user_id=current_user.id,
-            task_id=task_id,
-        )
         if test_passed == 5:
             print("OK")
-            submission_result = SubmissionResults(
-                submission_id=submission_id,
+            submission_result = Submissions(
+                user_id=current_user.id,
+                task_id=task_id,
                 verdict="OK",
                 total_tests=test_passed,
             )
         elif f_err == 0:
             print("неверный ответ")
-            submission_result = SubmissionResults(
-                submission_id=submission_id,
+            submission_result = Submissions(
+                user_id=current_user.id,
+                task_id=task_id,
                 verdict="Частичное решение",
                 total_tests=test_passed,
             )
-        db_sess.add(submissions)
         db_sess.add(submission_result)
         db_sess.commit()
     last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id, Submissions.task_id == task_id).all()
     if last_submission:
-        last_submission = last_submission[-1]
-        result = db_sess.query(SubmissionResults).filter(SubmissionResults.submission_id == last_submission.id).first()
+        result = last_submission[-1]
         verdict = result.verdict
         test_passed = result.total_tests
     else:
@@ -258,8 +254,9 @@ def pvp_room(room):
                 out = out.strip()
                 if err:
                     print(err)
-                    submission_result = SubmissionResults(
-                        submission_id=submission_id,
+                    submission_result = Submissions(
+                        user_id=current_user.id,
+                        task_id=task_id,
                         verdict=err,
                         total_tests=test_passed,
                     )
@@ -271,28 +268,24 @@ def pvp_room(room):
                 print("Превышено максимальное время работы")
                 p.kill()
         print(f"Пройдено тестов: {test_passed}")
-        submissions = Submissions(
-            user_id=current_user.id,
-            task_id=task_id,
-        )
         if test_passed == 5:
             print("OK")
-            submission_result = SubmissionResults(
-                submission_id=submission_id,
+            submission_result = Submissions(
+                user_id=current_user.id,
+                task_id=task_id,
                 verdict="OK",
                 total_tests=test_passed,
             )
         elif f_err == 0:
             print("неверный ответ")
-            submission_result = SubmissionResults(
-                submission_id=submission_id,
+            submission_result = Submissions(
+                user_id=current_user.id,
+                task_id=task_id,
                 verdict="Частичное решение",
                 total_tests=test_passed,
             )
-        db_sess.add(submissions)
         db_sess.add(submission_result)
         db_sess.commit()
-
         uid = str(current_user.id)
         matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), test_passed)
         if len(matches[room]['completed']) == 2 and not matches[room].get('finished'):
@@ -304,11 +297,12 @@ def pvp_room(room):
     for uid_str in matches[room]['players']:
         user = db_sess.get(User, int(uid_str))
         players_info.append({'name': user.name, 'elo': user.elo_rating})
-    last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id, Submissions.task_id == task_id).all()
+    last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
+                                                        Submissions.task_id == task_id).all()
     if last_submission:
-        last_submission = last_submission[-1]
-        result = db_sess.query(SubmissionResults).filter(SubmissionResults.submission_id == last_submission.id).first()
+        result = last_submission[-1]
         verdict = result.verdict
+        test_passed = result.total_tests
     else:
         verdict = "Нет сданных решений"
         test_passed = None
