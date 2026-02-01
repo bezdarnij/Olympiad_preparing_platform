@@ -342,7 +342,7 @@ def pvp_room(room):
         f_err = 0
         for test in task_test:
             p = subprocess.Popen(
-                ["python", f"submission_{submission_id}.py"],
+                ["python3", f"submission_{submission_id}.py"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
