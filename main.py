@@ -10,6 +10,7 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 import uuid
 import os
 import subprocess
+from functools import wraps
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
@@ -36,8 +37,18 @@ db_session.global_init("db/task.db")
 
 
 def admin_required(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         if not current_user.admin:
+            abort(403)
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def user_ban(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_user.ban:
             abort(403)
         return func(*args, **kwargs)
     return wrapper
@@ -78,11 +89,11 @@ def login():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
-        if user and user.check_password(form.password.data):
+        if user and user.check_password(form.password.data) and user.ban != 1:
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
         return render_template('login.html',
-                               message="Неправильный логин или пароль",
+                               message="Неправильный логин или пароль или вы в бане",
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
 
@@ -96,6 +107,7 @@ def logout():
 
 @app.route('/tasks')
 @login_required
+@user_ban
 def tasks():
     db_sess = db_session.create_session()
     sort_by = request.args.get('sort_by')
@@ -113,14 +125,24 @@ def tasks():
 @app.route('/admin', methods=["GET", "POST"])
 @login_required
 @admin_required
+@user_ban
 def admin():
     db_sess = db_session.create_session()
     users = db_sess.query(User)
     return render_template("admin_first.html", users=users)
 
 
+@app.route('/admin/task', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin_task():
+    return render_template("admin_task.html")
+
+
 @app.route('/pvp/create')
 @login_required
+@user_ban
 def create_pvp():
     room = str(uuid.uuid4())
     session['room'] = room
@@ -133,6 +155,7 @@ def create_pvp():
 
 @app.route('/pvp/join/<room>')
 @login_required
+@user_ban
 def join_pvp(room):
     if room not in matches:
         abort(404)
@@ -148,6 +171,7 @@ def join_pvp(room):
 
 @app.route('/pvp', methods=["GET", "POST"])
 @login_required
+@user_ban
 def pvp_choose():
     open_rooms = []
     for room_id, info in matches.items():
@@ -159,6 +183,7 @@ def pvp_choose():
 
 @app.route('/task/<int:task_id>', methods=["GET", "POST"])
 @login_required
+@user_ban
 def training(task_id):
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
@@ -242,6 +267,7 @@ def training(task_id):
 
 @app.route('/pvp/room/<room>', methods=["GET", "POST"])
 @login_required
+@user_ban
 def pvp_room(room):
     task_id = 2
     db_sess = db_session.create_session()
