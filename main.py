@@ -42,6 +42,7 @@ def admin_required(func):
         if not current_user.admin:
             abort(403)
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -51,6 +52,7 @@ def user_ban(func):
         if current_user.ban:
             abort(403)
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -103,6 +105,58 @@ def login():
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.route('/profile')
+@app.route('/profile/<int:user_id>')
+@login_required
+def profile(user_id=None):
+    db_sess = db_session.create_session()
+    if user_id is None:
+        user = current_user
+    else:
+        user = db_sess.get(User, user_id)
+        if not user:
+            abort(404)
+
+    all_submissions = db_sess.query(Submissions).filter(
+        Submissions.user_id == user.id
+    ).order_by(Submissions.created_at.desc()).all()
+    tasks_stats = {}
+    for submission in all_submissions:
+        task_id = submission.task_id
+        if task_id not in tasks_stats:
+            tasks_stats[task_id] = {
+                'task': submission.tasks,
+                'best_submission': submission,
+                'attempts': 1,
+                'solved': submission.verdict == "OK"
+            }
+        else:
+            tasks_stats[task_id]['attempts'] += 1
+            if submission.total_tests > tasks_stats[task_id]['best_submission'].total_tests:
+                tasks_stats[task_id]['best_submission'] = submission
+            if submission.verdict == "OK":
+                tasks_stats[task_id]['solved'] = True
+
+    sorted_tasks = sorted(
+        tasks_stats.values(),
+        key=lambda x: (not x['solved'], -x['best_submission'].total_tests)
+    )
+
+    total_tasks_attempted = len(tasks_stats)
+    solved_tasks = sum(1 for t in tasks_stats.values() if t['solved'])
+    total_submissions = len(all_submissions)
+
+    return render_template(
+        'profile.html',
+        user=user,
+        tasks_stats=sorted_tasks,
+        total_tasks_attempted=total_tasks_attempted,
+        solved_tasks=solved_tasks,
+        total_submissions=total_submissions,
+        is_own_profile=(user.id == current_user.id)
+    )
 
 
 @app.route('/tasks')
@@ -180,7 +234,6 @@ def pvp_choose():
     return render_template('choose.html', rooms=open_rooms)
 
 
-
 @app.route('/task/<int:task_id>', methods=["GET", "POST"])
 @login_required
 @user_ban
@@ -254,7 +307,8 @@ def training(task_id):
             )
         db_sess.add(submission_result)
         db_sess.commit()
-    last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id, Submissions.task_id == task_id).all()
+    last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
+                                                        Submissions.task_id == task_id).all()
     if last_submission:
         result = last_submission[-1]
         verdict = result.verdict
@@ -362,7 +416,8 @@ def pvp_room(room):
     else:
         verdict = "Нет сданных решений"
         test_passed = None
-    return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info, verdict=verdict, test_passed=test_passed)
+    return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info,
+                           verdict=verdict, test_passed=test_passed)
 
 
 def finish_match(room):

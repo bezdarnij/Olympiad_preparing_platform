@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль - {{ user.name }}{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="user-info">
+            <div class="avatar">{{ user.name[0].upper() }}</div>
+            <div class="user-details">
+                <h1>{{ user.name }}</h1>
+                <p class="email">{{ user.email }}</p>
+                <p class="member-since">Зарегистрирован: {{ user.created_date.strftime('%d.%m.%Y') }}</p>
+            </div>
+        </div>
+
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-value">{{ user.elo_rating|round|int }}</div>
+                <div class="stat-label">Рейтинг ELO</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">{{ solved_tasks }}</div>
+                <div class="stat-label">Решено задач</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">{{ total_tasks_attempted }}</div>
+                <div class="stat-label">Попыток задач</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">{{ total_submissions }}</div>
+                <div class="stat-label">Всего попыток</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <h2>Решенные задачи</h2>
+
+        {% if tasks_stats %}
+        <div class="tasks-list">
+            {% for task_stat in tasks_stats %}
+            <div class="task-item {% if task_stat.solved %}solved{% endif %}">
+                <div class="task-header">
+                    <div class="task-title-section">
+                        <span class="status-badge {% if task_stat.solved %}badge-success{% else %}badge-partial{% endif %}">
+                            {% if task_stat.solved %}
+                                ✓ Решено
+                            {% else %}
+                                Частично
+                            {% endif %}
+                        </span>
+                        <h3>
+                            <a href="/task/{{ task_stat.task.id }}">{{ task_stat.task.title }}</a>
+                        </h3>
+                    </div>
+                    <div class="task-meta">
+                        <span class="difficulty difficulty-{{ task_stat.task.difficulty|lower }}">
+                            {{ task_stat.task.difficulty }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="task-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">📝</span>
+                        <span>Попыток: {{ task_stat.attempts }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">✓</span>
+                        <span>Тестов: {{ task_stat.best_submission.total_tests }}/5</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🏆</span>
+                        <span>Вердикт: {{ task_stat.best_submission.verdict }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">📅</span>
+                        <span>{{ task_stat.best_submission.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-tasks">
+            <p>{% if is_own_profile %}Вы еще не решали задачи{% else %}Пользователь еще не решал задачи{% endif %}</p>
+            {% if is_own_profile %}
+            <a href="/tasks" class="btn btn-primary">Перейти к задачам</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+

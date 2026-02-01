@@ -20,6 +20,7 @@
         <div class="nav-right">
             {% if current_user.is_authenticated %}
                 <a class="nav-link" href="/pvp">PvP</a>
+                <a class="nav-link" href="/profile">Профиль</a>
                 {% if current_user.admin %}
                     <a class="btn btn-admin" href="/admin">Админ-панель</a>
                 {% endif %}
