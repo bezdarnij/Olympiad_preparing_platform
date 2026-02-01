@@ -18,6 +18,7 @@
             {{ task.title }}
           </a>
         </li>
+        <p>Предмет: {{ task.subject or 'Не указан' }}</p>
         <p>Сложность: {{ task.difficulty or 'Не указана' }}</p>
     </div>
     {% endfor %}
