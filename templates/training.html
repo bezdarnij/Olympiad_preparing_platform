@@ -35,14 +35,44 @@
 
 <p>Вердикт: {{ verdict }}</p>
 
-{% if test_passed %}
+{% if test_passed is not none %}
     <p>Пройдено тестов: {{ test_passed }}</p>
 {% endif %}
 
 <div class="task">
-    <form class="send" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <button type="submit">Отправить решение</button>
+    <form class="send" method="post" enctype="multipart/form-data" id="uploadForm">
+        <input type="file" accept=".py" name="file" id="pythonFile" required />
+        <button type="submit" id="submitBtn">Отправить</button>
     </form>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('uploadForm').addEventListener('submit', function (event) {
+    const fileInput = document.getElementById('pythonFile')
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+        event.preventDefault()
+        alert('Пожалуйста, выберите файл.')
+        return false
+    }
+
+    const file = fileInput.files[0]
+    const fileExtension = file.name.split('.').pop().toLowerCase()
+
+    if (fileExtension !== 'py') {
+        event.preventDefault()
+        alert('Допускаются только файлы с расширением .py')
+        return false
+    }
+
+    if (file.size > 1024 * 1024) {
+        event.preventDefault()
+        alert('Файл слишком большой. Максимальный размер: 1MB')
+        return false
+    }
+
+    return true
+})
+</script>
 {% endblock %}

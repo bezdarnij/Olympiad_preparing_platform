@@ -64,6 +64,18 @@ body {
     color: #2563eb;
 }
 
+/* ===== Admin button ===== */
+.btn-admin {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(220, 38, 38, 0.3);
+}
+
+.btn-admin:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(220, 38, 38, 0.45);
+}
+
 /* ===== User menu ===== */
 .user-menu {
     display: flex;

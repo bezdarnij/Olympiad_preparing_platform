@@ -36,7 +36,7 @@
 </div>
 
 <p>Вердикт: {{ verdict }}</p>
-{% if test_passed %}
+{% if test_passed is not none %}
 <p>Пройдено тестов: {{ test_passed }}</p>
 {% endif %}
 

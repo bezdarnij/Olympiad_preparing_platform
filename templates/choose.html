@@ -1,63 +1,44 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="{{ url_for('static', filename='choose.css') }}">
-		<title>Выбор комнаты</title>
-		<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-	</head>
-	<body>
-		<header>
-			<nav class="navbar navbar-light bg-light">
-				<a class="navbar-brand" href="/">Наше приложение</a>
-				{% if current_user.is_authenticated %}
-					<a class="navbar-brand" href="/pvp">Pvp режим</a>
-					<a class="navbar-brand" href="/training">Режим тренировки</a>
-					<a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
-				{% else %}
-					<p>
-						<a class="btn btn-primary" href="/register">Зарегистрироваться</a>
-						<a class="btn btn-success" href="/login">Войти</a>
-					</p>
-				{% endif %}
-			</nav>
-		</header>
-		<div class="choose">
-			<a class="btn btn-success" href="/pvp/create">Создать комнату</a>
+{% extends "base.html" %}
+{% block title %}Выбор комнаты{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='choose.css') }}">{% endblock %}
+{% block content %}
+<div class="choose">
+    <a class="btn btn-success" href="/pvp/create">Создать комнату</a>
 
-			<br /><br />
+    <br /><br />
 
-			<input
-				type="text"
-				id="roomCode"
-				placeholder="Введите код комнаты"
-			/>
-			<button onclick="joinByCode()">Войти по коду</button>
-			<p>Список комнат ({{ rooms|length }}):</p>
-			{% if rooms %}
-				<ul>
-					{% for room_id in rooms %}
-						<li>
-							Комната: {{ room_id }}
-							<a href="/pvp/join/{{ room_id }}">Присоединиться</a>
-						</li>
-					{% endfor %}
-				</ul>
-			{% else %}
-				<p>Нет активных комнат <a href="/pvp/create">Создайте первую</a></p>
-			{% endif %}
-		</div>
-		<script>
-			function joinByCode() {
-				const code = document.getElementById('roomCode').value.trim()
+    <input
+        type="text"
+        id="roomCode"
+        placeholder="Введите код комнаты"
+    />
+    <button onclick="joinByCode()">Войти по коду</button>
+    <p>Список комнат ({{ rooms|length }}):</p>
+    {% if rooms %}
+        <ul>
+            {% for room_id in rooms %}
+                <li>
+                    Комната: {{ room_id }}
+                    <a href="/pvp/join/{{ room_id }}">Присоединиться</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет активных комнат <a href="/pvp/create">Создайте первую</a></p>
+    {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    function joinByCode() {
+        const code = document.getElementById('roomCode').value.trim()
 
-				if (!code) {
-					alert('Введите код комнаты')
-					return
-				}
-				window.location.href = `/pvp/join/${code}`
-			}
-		</script>
-	</body>
-</html>
+        if (!code) {
+            alert('Введите код комнаты')
+            return
+        }
+        window.location.href = `/pvp/join/${code}`
+    }
+</script>
+{% endblock %}

@@ -21,6 +21,11 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 matches = {}
 
 
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("403.html"), 403
+
+
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
@@ -28,6 +33,14 @@ def load_user(user_id):
 
 
 db_session.global_init("db/task.db")
+
+
+def admin_required(func):
+    def wrapper(*args, **kwargs):
+        if not current_user.admin:
+            abort(403)
+        return func(*args, **kwargs)
+    return wrapper
 
 
 @app.route("/")
@@ -99,6 +112,7 @@ def tasks():
 
 @app.route('/admin', methods=["GET", "POST"])
 @login_required
+@admin_required
 def admin():
     db_sess = db_session.create_session()
     users = db_sess.query(User)
@@ -179,7 +193,7 @@ def training(task_id):
                     submission_result = Submissions(
                         user_id=current_user.id,
                         task_id=task_id,
-                        verdict=err,
+                        verdict=err.splitlines()[-1],
                         total_tests=test_passed,
                     )
                     f_err = 1
@@ -188,6 +202,13 @@ def training(task_id):
                         test_passed += 1
             except subprocess.TimeoutExpired:
                 print("Превышено максимальное время работы")
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="Превышено максимальное время работы",
+                    total_tests=test_passed,
+                )
+                f_err = 1
                 p.kill()
         print(f"Пройдено тестов: {test_passed}")
         if test_passed == 5:
@@ -222,7 +243,7 @@ def training(task_id):
 @app.route('/pvp/room/<room>', methods=["GET", "POST"])
 @login_required
 def pvp_room(room):
-    task_id = 1
+    task_id = 2
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
@@ -256,7 +277,7 @@ def pvp_room(room):
                     submission_result = Submissions(
                         user_id=current_user.id,
                         task_id=task_id,
-                        verdict=err,
+                        verdict=err.splitlines()[-1],
                         total_tests=test_passed,
                     )
                     f_err = 1
@@ -265,6 +286,13 @@ def pvp_room(room):
                         test_passed += 1
             except subprocess.TimeoutExpired:
                 print("Превышено максимальное время работы")
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="Превышено максимальное время работы",
+                    total_tests=test_passed,
+                )
+                f_err = 1
                 p.kill()
         print(f"Пройдено тестов: {test_passed}")
         if test_passed == 5:
@@ -285,6 +313,7 @@ def pvp_room(room):
             )
         db_sess.add(submission_result)
         db_sess.commit()
+
         uid = str(current_user.id)
         matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), test_passed)
         if len(matches[room]['completed']) == 2 and not matches[room].get('finished'):
@@ -292,10 +321,12 @@ def pvp_room(room):
             socketio.emit('match_finished', {'result': result}, room=room)
 
         return redirect(f"/pvp/room/{room}")
+
     players_info = []
     for uid_str in matches[room]['players']:
         user = db_sess.get(User, int(uid_str))
         players_info.append({'name': user.name, 'elo': user.elo_rating})
+
     last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
                                                         Submissions.task_id == task_id).all()
     if last_submission:

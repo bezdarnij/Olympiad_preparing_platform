@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
-        <title>Таблица пользователей</title>
-    </head>
-    <body>
+{% extends "base.html" %}
+{% block title %}Таблица пользователей{% endblock %}
+{% block styles %}{% endblock %}
+{% block content %}
         <ul>
             {% for user in users %}
-                <li>{{ user.name }}(ID: {{user.id}})(Email: {{user.email}}(Admin: <select><option value="admin">Admin</option><option value="user">User</option></select>)(Ban: <select><option value="ban">Ban</option></select>)</li>
+                <li>ID: {{user.id}}, {{ user.name }}, Email: {{user.email}}, Admin: <select><option value="admin">Admin</option><option value="user">User</option></select>, Ban: <select><option value="ban">Ban</option></select></li>
             {% endfor %}
         </ul>
-    </body>
-</html>
+{% endblock %}
