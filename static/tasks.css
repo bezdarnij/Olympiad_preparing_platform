@@ -1,0 +1,293 @@
+/* ===== Tasks Catalog Page Styles ===== */
+
+/* ===== Main Title ===== */
+h1 {
+    font-size: 36px;
+    font-weight: 800;
+    text-align: center;
+    margin: 0 0 32px 0;
+    background: linear-gradient(135deg, #6d28d9, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===== Sort Form ===== */
+form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(168, 85, 247, 0.2);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.1);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+}
+
+form br {
+    display: none;
+}
+
+/* ===== Form Label Text ===== */
+form::before {
+    content: 'Сортировать по';
+    font-size: 15px;
+    font-weight: 700;
+    color: #5b21b6;
+    margin-right: 8px;
+}
+
+form > text {
+    display: none;
+}
+
+/* ===== Select Dropdown ===== */
+select {
+    padding: 10px 16px;
+    border: 2px solid rgba(168, 85, 247, 0.3);
+    border-radius: 10px;
+    background: #ffffff;
+    color: #4c1d95;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);
+    min-width: 200px;
+}
+
+select:hover {
+    border-color: #7c3aed;
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.15);
+}
+
+select:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
+}
+
+/* ===== Sort Button ===== */
+.btn-secondary {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #ffffff !important;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s ease, height 0.5s ease;
+}
+
+.btn-secondary:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+    background: linear-gradient(135deg, #6d28d9, #7c3aed);
+    color: #ffffff !important;
+}
+
+/* ===== Task Cards ===== */
+.col-md-6 {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(168, 85, 247, 0.2) !important;
+    border-radius: 16px !important;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.1);
+    transition: all 0.3s ease;
+    list-style: none;
+}
+
+.col-md-6:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.18);
+    border-color: rgba(168, 85, 247, 0.4) !important;
+}
+
+/* ===== Task List Item ===== */
+.col-md-6 li {
+    list-style: none;
+    margin: 0 0 16px 0;
+    padding: 0;
+}
+
+.col-md-6 li a {
+    font-size: 20px;
+    font-weight: 700;
+    color: #5b21b6;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.col-md-6 li a:hover {
+    color: #7c3aed;
+    transform: translateX(4px);
+}
+
+/* ===== Task Details ===== */
+.col-md-6 p {
+    color: #6b7280;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.col-md-6 p:first-of-type::before {
+    content: '📚';
+    font-size: 18px;
+}
+
+.col-md-6 p:last-of-type::before {
+    content: '⭐';
+    font-size: 18px;
+}
+
+/* ===== Empty State ===== */
+.page-content > p:last-child {
+    text-align: center;
+    font-size: 18px;
+    color: #6b7280;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+    border: 2px dashed rgba(168, 85, 247, 0.3);
+    border-radius: 16px;
+    margin-top: 20px;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 28px;
+        margin-bottom: 24px;
+    }
+
+    form {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 20px;
+    }
+
+    select {
+        width: 100%;
+    }
+
+    .btn-secondary {
+        width: 100%;
+    }
+
+    .col-md-6 {
+        padding: 20px;
+    }
+
+    .col-md-6 li a {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 24px;
+    }
+
+    .col-md-6 {
+        padding: 16px;
+    }
+
+    .col-md-6 li a {
+        font-size: 16px;
+    }
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+form {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.col-md-6 {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.col-md-6:nth-child(1) { animation-delay: 0.05s; }
+.col-md-6:nth-child(2) { animation-delay: 0.1s; }
+.col-md-6:nth-child(3) { animation-delay: 0.15s; }
+.col-md-6:nth-child(4) { animation-delay: 0.2s; }
+.col-md-6:nth-child(5) { animation-delay: 0.25s; }
+.col-md-6:nth-child(6) { animation-delay: 0.3s; }
+.col-md-6:nth-child(7) { animation-delay: 0.35s; }
+.col-md-6:nth-child(8) { animation-delay: 0.4s; }
+
+/* ===== Grid Layout for Task Cards ===== */
+.page-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+}
+
+.page-content h1,
+.page-content form {
+    grid-column: 1;
+}
+
+@media (min-width: 768px) {
+    .page-content {
+        display: block;
+    }
+}
+
+/* ===== Difficulty Badge Styling ===== */
+.col-md-6 p:last-of-type {
+    position: relative;
+}
+
+.col-md-6 p:contains("Легкая") {
+    color: #059669;
+}
+
+.col-md-6 p:contains("Средняя") {
+    color: #f59e0b;
+}
+
+.col-md-6 p:contains("Сложная") {
+    color: #dc2626;
+}

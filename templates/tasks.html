@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='tasks.css') }}">
+{% endblock %}
+
 {% block content %}
 <h1>Каталог задач</h1>
-<form method="get" action="/tasks">
-    Сортировать по<br />
+<form method="get" action="/">
     <select name="sort_by">
         <option value="difficulty">Сложности</option>
         <option value="theme">Темe</option>

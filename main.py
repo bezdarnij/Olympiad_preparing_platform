@@ -58,7 +58,17 @@ def user_ban(func):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    db_sess = db_session.create_session()
+    sort_by = request.args.get('sort_by')
+
+    if sort_by == 'difficulty':
+        tasks = db_sess.query(Tasks).order_by(Tasks.difficulty).all()
+    elif sort_by == 'theme':
+        tasks = db_sess.query(Tasks).all()
+    else:
+        tasks = db_sess.query(Tasks).all()
+
+    return render_template('tasks.html', tasks=tasks)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -157,23 +167,6 @@ def profile(user_id=None):
         total_submissions=total_submissions,
         is_own_profile=(user.id == current_user.id)
     )
-
-
-@app.route('/tasks')
-@login_required
-@user_ban
-def tasks():
-    db_sess = db_session.create_session()
-    sort_by = request.args.get('sort_by')
-
-    if sort_by == 'difficulty':
-        tasks = db_sess.query(Tasks).order_by(Tasks.difficulty).all()
-    elif sort_by == 'theme':
-        tasks = db_sess.query(Tasks).all()
-    else:
-        tasks = db_sess.query(Tasks).all()
-
-    return render_template('tasks.html', tasks=tasks)
 
 
 @app.route('/admin', methods=["GET", "POST"])

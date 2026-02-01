@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Таблица пользователей{% endblock %}
-{% block styles %}{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='admin_first.css') }}">
+{% endblock %}
 {% block content %}
 <a class="btn btn-task" href="/admin/task">Добавить задачу</a>
 <ul>
