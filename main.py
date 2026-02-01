@@ -143,10 +143,9 @@ def pvp_choose():
 
 
 
-@app.route('/training', methods=["GET", "POST"])
+@app.route('/task/<int:task_id>', methods=["GET", "POST"])
 @login_required
-def training():
-    task_id = 1
+def training(task_id):
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()

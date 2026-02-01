@@ -13,7 +13,11 @@
 {% if tasks %}
     {% for task in tasks %}
     <div class="col-md-6 border rounded" style="margin-bottom: 20px;">
-        <h2>{{ task.title }}</h2>
+        <li>
+          <a href="{{ url_for('training', task_id=task.id) }}">
+            {{ task.title }}
+          </a>
+        </li>
         <p>Сложность: {{ task.difficulty or 'Не указана' }}</p>
     </div>
     {% endfor %}
