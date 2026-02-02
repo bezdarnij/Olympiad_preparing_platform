@@ -4,12 +4,41 @@
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='admin_first.css') }}">
 {% endblock %}
+
 {% block content %}
 <a class="btn btn-task" href="/admin/task">Добавить задачу</a>
-<ul>
-    {% for user in users %}
-        <li>ID: {{user.id}}, {{ user.name }}, Email: {{user.email}}, Admin: <select><option value="admin">admin</option><option value="user">user</option></select>, Ban: <select><option value="ban">ban</option><option value="ban">unban</option></select></li>
-    {% endfor %}
-</ul>
+
+<div class="table-container">
+    <table>
+        <tr>
+            <td>id</td>
+            <td>name</td>
+            <td>email</td>
+            <td>admin</td>
+            <td>ban</td>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{user.id}}</td>
+            <td>{{ user.name }}</td>
+            <td>{{user.email}}</td>
+            <td>
+                <select>
+                    <option value="admin">admin</option>
+                    <option value="user">user</option>
+                </select>
+            </td>
+            <td>
+                Ban:
+                <select>
+                    <option value="ban">ban</option>
+                    <option value="unban">unban</option>
+                </select>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
 <button type="button" id="applytBtn">Применить</button>
 {% endblock %}
