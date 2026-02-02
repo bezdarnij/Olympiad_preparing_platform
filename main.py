@@ -58,7 +58,10 @@ def user_ban(func):
 
 
 @app.route("/")
-def index():
+@app.route("/<subject>/")
+def index(subject=None):
+    if request.path == '/' or 'subject' in request.path:
+        return redirect('/subject')
     db_sess = db_session.create_session()
     sort_by = request.args.get('sort_by')
 
@@ -69,16 +72,17 @@ def index():
     else:
         tasks = db_sess.query(Tasks).all()
 
-    return render_template('tasks.html', tasks=tasks)
+    return render_template('tasks.html', tasks=tasks, subject=subject)
 
 
-@app.route("/<string:subject>", methods=['GET', 'POST'])
+@app.route("/<subject>", methods=['GET', 'POST'])
 def subject(subject):
-    is_subject = 0
+    session['subject'] = "subject"
     path = request.path.split('/')
     if path[1] != 'subject':
-        is_subject = 1
-    return render_template('subject.html', is_subject=is_subject)
+        session['subject'] = path[1]
+        return redirect(f"/{subject}/")
+    return render_template('subject.html',  subject=subject)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -131,6 +135,7 @@ def logout():
 @app.route('/profile/<int:user_id>')
 @login_required
 def profile(user_id=None):
+    subject = session.get('subject')
     db_sess = db_session.create_session()
     if user_id is None:
         user = current_user
@@ -175,7 +180,8 @@ def profile(user_id=None):
         total_tasks_attempted=total_tasks_attempted,
         solved_tasks=solved_tasks,
         total_submissions=total_submissions,
-        is_own_profile=(user.id == current_user.id)
+        is_own_profile=(user.id == current_user.id),
+        subject=subject
     )
 
 
@@ -184,9 +190,10 @@ def profile(user_id=None):
 @admin_required
 @user_ban
 def admin():
+    subject = session.get('subject')
     db_sess = db_session.create_session()
     users = db_sess.query(User)
-    return render_template("admin_first.html", users=users)
+    return render_template("admin_first.html", users=users, subject=subject)
 
 
 @app.route('/admin/task', methods=["GET", "POST"])
@@ -194,26 +201,27 @@ def admin():
 @admin_required
 @user_ban
 def admin_task():
-    return render_template("admin_task.html")
+    subject = session.get('subject')
+    return render_template("admin_task.html", subject=subject)
 
 
-@app.route('/pvp/create')
+@app.route('/<subject>/pvp/create')
 @login_required
 @user_ban
-def create_pvp():
+def create_pvp(subject):
     room = str(uuid.uuid4())
     session['room'] = room
     matches[room] = {
         'players': [current_user.id],
         'completed': {str(current_user.id): 0}
     }
-    return redirect(f'/pvp/room/{room}')
+    return redirect(f'/{subject}/pvp/room/{room}')
 
 
-@app.route('/pvp/join/<room>')
+@app.route('/<subject>/pvp/join/<room>')
 @login_required
 @user_ban
-def join_pvp(room):
+def join_pvp(subject, room):
     if room not in matches:
         abort(404)
     if len(matches[room]['players']) >= 2:
@@ -223,24 +231,24 @@ def join_pvp(room):
     matches[room]['players'].append(current_user.id)
     matches[room]['completed'][str(current_user.id)] = 0
     session['room'] = room
-    return redirect(f'/pvp/room/{room}')
+    return redirect(f'/{subject}/pvp/room/{room}')
 
 
-@app.route('/pvp', methods=["GET", "POST"])
+@app.route('/<subject>/pvp', methods=["GET", "POST"])
 @login_required
 @user_ban
-def pvp_choose():
+def pvp_choose(subject):
     open_rooms = []
     for room_id, info in matches.items():
         if len(info['players']) < 2:
             open_rooms.append(room_id)
-    return render_template('choose.html', rooms=open_rooms)
+    return render_template('choose.html', rooms=open_rooms, subject=subject)
 
 
-@app.route('/task/<int:task_id>', methods=["GET", "POST"])
+@app.route('/<subject>/task/<int:task_id>', methods=["GET", "POST"])
 @login_required
 @user_ban
-def training(task_id):
+def training(subject, task_id):
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
@@ -322,10 +330,10 @@ def training(task_id):
     return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed)
 
 
-@app.route('/pvp/room/<room>', methods=["GET", "POST"])
+@app.route('/<subject>/pvp/room/<room>', methods=["GET", "POST"])
 @login_required
 @user_ban
-def pvp_room(room):
+def pvp_room(subject, room):
     task_id = 2
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
@@ -403,7 +411,7 @@ def pvp_room(room):
             result = finish_match(room)
             socketio.emit('match_finished', {'result': result}, room=room)
 
-        return redirect(f"/pvp/room/{room}")
+        return redirect(f"/{subject}/pvp/room/{room}")
 
     players_info = []
     for uid_str in matches[room]['players']:
@@ -498,4 +506,4 @@ def on_submit(data):
 
 
 if __name__ == '__main__':
-    socketio.run(app, port=8025, host='127.0.0.1', allow_unsafe_werkzeug=True, debug=True)
+    socketio.run(app, port=8080, host='127.0.0.1', allow_unsafe_werkzeug=True, debug=True)

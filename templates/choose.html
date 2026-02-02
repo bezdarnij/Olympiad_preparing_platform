@@ -3,7 +3,7 @@
 {% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='choose.css') }}">{% endblock %}
 {% block content %}
 <div class="choose">
-    <a class="btn btn-success" href="/pvp/create">Создать комнату</a>
+    <a class="btn btn-success" href="/{{ subject }}/pvp/create">Создать комнату</a>
 
     <br /><br />
 
@@ -19,12 +19,12 @@
             {% for room_id in rooms %}
                 <li>
                     Комната: {{ room_id }}
-                    <a href="/pvp/join/{{ room_id }}">Присоединиться</a>
+                    <a href="/{{ subject }}/pvp/join/{{ room_id }}">Присоединиться</a>
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>Нет активных комнат <a href="/pvp/create">Создайте первую</a></p>
+        <p>Нет активных комнат <a href="/{{ subject }}/pvp/create">Создайте первую</a></p>
     {% endif %}
 </div>
 {% endblock %}
@@ -38,7 +38,7 @@
             alert('Введите код комнаты')
             return
         }
-        window.location.href = `/pvp/join/${code}`
+        window.location.href = `/${subject}/pvp/join/${code}`
     }
 </script>
 {% endblock %}
