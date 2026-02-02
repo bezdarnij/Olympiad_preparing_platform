@@ -14,10 +14,9 @@ class Submissions(SqlAlchemyBase):
                                 sqlalchemy.ForeignKey("users.id"))
     task_id = sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey("tasks.id"))
-    file_path = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
-    status = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
+    total_tests = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+    verdict = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
     created_at = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
     tasks = orm.relationship('Tasks', back_populates="submissions")
     user = orm.relationship("User", back_populates="submissions")
-    result = orm.relationship("SubmissionResults", back_populates="submissions")

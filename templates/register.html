@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
+{% endblock %}
+
 {% block content %}
 <h1>Регистрация</h1>
 <form action="" method="post">
@@ -35,15 +39,6 @@
         {{ form.name.label }}<br>
         {{ form.name(class="form-control") }}<br>
         {% for error in form.name.errors %}
-            <p class="alert alert-danger" role="alert">
-                {{ error }}
-            </p>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form.about.label }}<br>
-        {{ form.about(class="form-control") }}<br>
-        {% for error in form.about.errors %}
             <p class="alert alert-danger" role="alert">
                 {{ error }}
             </p>

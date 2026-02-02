@@ -4,13 +4,14 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from data.users import User
 from data.tasks import Tasks
 from data.submissions import Submissions
-from data.submission_results import SubmissionResults
 from data.task_tests import TaskTest
 from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import uuid
 import os
 import subprocess
+
+from functools import wraps
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
@@ -22,6 +23,11 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 matches = {}
 
 
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("403.html"), 403
+
+
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
@@ -31,9 +37,39 @@ def load_user(user_id):
 db_session.global_init("db/task.db")
 
 
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not current_user.admin:
+            abort(403)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def user_ban(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_user.ban:
+            abort(403)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 @app.route("/")
 def index():
-    return render_template("index.html")
+    db_sess = db_session.create_session()
+    sort_by = request.args.get('sort_by')
+
+    if sort_by == 'difficulty':
+        tasks = db_sess.query(Tasks).order_by(Tasks.difficulty).all()
+    elif sort_by == 'theme':
+        tasks = db_sess.query(Tasks).all()
+    else:
+        tasks = db_sess.query(Tasks).all()
+
+    return render_template('tasks.html', tasks=tasks)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -52,7 +88,6 @@ def reqister():
         user = User(
             name=form.name.data,
             email=form.email.data,
-            about=form.about.data
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -67,11 +102,11 @@ def login():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
-        if user and user.check_password(form.password.data):
+        if user and user.check_password(form.password.data) and user.ban != 1:
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
         return render_template('login.html',
-                               message="Неправильный логин или пароль",
+                               message="Неправильный логин или пароль или вы в бане",
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
 
@@ -83,24 +118,79 @@ def logout():
     return redirect("/")
 
 
-@app.route('/tasks')
+@app.route('/profile')
+@app.route('/profile/<int:user_id>')
 @login_required
-def tasks():
+def profile(user_id=None):
     db_sess = db_session.create_session()
-    sort_by = request.args.get('sort_by')
-
-    if sort_by == 'difficulty':
-        tasks = db_sess.query(Tasks).order_by(Tasks.difficulty).all()
-    elif sort_by == 'theme':
-        tasks = db_sess.query(Tasks).all()
+    if user_id is None:
+        user = current_user
     else:
-        tasks = db_sess.query(Tasks).all()
+        user = db_sess.get(User, user_id)
+        if not user:
+            abort(404)
 
-    return render_template('tasks.html', tasks=tasks)
+    all_submissions = db_sess.query(Submissions).filter(
+        Submissions.user_id == user.id
+    ).order_by(Submissions.created_at.desc()).all()
+    tasks_stats = {}
+    for submission in all_submissions:
+        task_id = submission.task_id
+        if task_id not in tasks_stats:
+            tasks_stats[task_id] = {
+                'task': submission.tasks,
+                'best_submission': submission,
+                'attempts': 1,
+                'solved': submission.verdict == "OK"
+            }
+        else:
+            tasks_stats[task_id]['attempts'] += 1
+            if submission.total_tests > tasks_stats[task_id]['best_submission'].total_tests:
+                tasks_stats[task_id]['best_submission'] = submission
+            if submission.verdict == "OK":
+                tasks_stats[task_id]['solved'] = True
+
+    sorted_tasks = sorted(
+        tasks_stats.values(),
+        key=lambda x: (not x['solved'], -x['best_submission'].total_tests)
+    )
+
+    total_tasks_attempted = len(tasks_stats)
+    solved_tasks = sum(1 for t in tasks_stats.values() if t['solved'])
+    total_submissions = len(all_submissions)
+
+    return render_template(
+        'profile.html',
+        user=user,
+        tasks_stats=sorted_tasks,
+        total_tasks_attempted=total_tasks_attempted,
+        solved_tasks=solved_tasks,
+        total_submissions=total_submissions,
+        is_own_profile=(user.id == current_user.id)
+    )
+
+
+@app.route('/admin', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin():
+    db_sess = db_session.create_session()
+    users = db_sess.query(User)
+    return render_template("admin_first.html", users=users)
+
+
+@app.route('/admin/task', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin_task():
+    return render_template("admin_task.html")
 
 
 @app.route('/pvp/create')
 @login_required
+@user_ban
 def create_pvp():
     room = str(uuid.uuid4())
     session['room'] = room
@@ -113,6 +203,7 @@ def create_pvp():
 
 @app.route('/pvp/join/<room>')
 @login_required
+@user_ban
 def join_pvp(room):
     if room not in matches:
         abort(404)
@@ -128,6 +219,7 @@ def join_pvp(room):
 
 @app.route('/pvp', methods=["GET", "POST"])
 @login_required
+@user_ban
 def pvp_choose():
     open_rooms = []
     for room_id, info in matches.items():
@@ -136,55 +228,96 @@ def pvp_choose():
     return render_template('choose.html', rooms=open_rooms)
 
 
-@app.route('/training', methods=["GET", "POST"])
+@app.route('/task/<int:task_id>', methods=["GET", "POST"])
 @login_required
-def training():
-    task_id = 1
+@user_ban
+def training(task_id):
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
+    submission = db_sess.query(Submissions).filter(Submissions.task_id == task.id).all()
+    submission_id = len(submission) + 1
     if request.method == "POST":
         file = request.files.get("file")
         if not file or file.filename == "":
             abort(400, "Файл не выбран")
-        file.filename = f"submission_{current_user.id}.py"
-        os.makedirs(f"submissions_training/submissions_{current_user.id}", exist_ok=True)
-        file.save(os.path.join(f"submissions_training/submissions_{current_user.id}", file.filename))
+        file.filename = f"submission_{submission_id}.py"
+        os.makedirs(f"submissions_training/submissions_{current_user.id}/task_{task_id}", exist_ok=True)
+        file.save(os.path.join(f"submissions_training/submissions_{current_user.id}/task_{task_id}", file.filename))
 
         # judge
         test_passed = 0
+        f_err = 0
         for test in task_test:
             p = subprocess.Popen(
-                ["python", f"submission_{current_user.id}.py"],
+                ["python", f"submission_{submission_id}.py"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                cwd=f"submissions_training/submissions_{current_user.id}/"
+                cwd=f"submissions_training/submissions_{current_user.id}/task_{task_id}"
             )
             try:
                 out, err = p.communicate(test.input_data, timeout=task.time_limit)
                 out = out.strip()
                 if err:
                     print(err)
+                    submission_result = Submissions(
+                        user_id=current_user.id,
+                        task_id=task_id,
+                        verdict=err.splitlines()[-1],
+                        total_tests=test_passed,
+                    )
+                    f_err = 1
                 else:
                     if out == test.output.strip():
                         test_passed += 1
             except subprocess.TimeoutExpired:
                 print("Превышено максимальное время работы")
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="Превышено максимальное время работы",
+                    total_tests=test_passed,
+                )
+                f_err = 1
                 p.kill()
         print(f"Пройдено тестов: {test_passed}")
         if test_passed == 5:
             print("OK")
-        else:
+            submission_result = Submissions(
+                user_id=current_user.id,
+                task_id=task_id,
+                verdict="OK",
+                total_tests=test_passed,
+            )
+        elif f_err == 0:
             print("неверный ответ")
-    return render_template('training.html', task=task, test=task_test[0])
+            submission_result = Submissions(
+                user_id=current_user.id,
+                task_id=task_id,
+                verdict="Частичное решение",
+                total_tests=test_passed,
+            )
+        db_sess.add(submission_result)
+        db_sess.commit()
+    last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
+                                                        Submissions.task_id == task_id).all()
+    if last_submission:
+        result = last_submission[-1]
+        verdict = result.verdict
+        test_passed = result.total_tests
+    else:
+        verdict = "Нет сданных решений"
+        test_passed = None
+    return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed)
 
 
 @app.route('/pvp/room/<room>', methods=["GET", "POST"])
 @login_required
+@user_ban
 def pvp_room(room):
-    task_id = 1
+    task_id = 2
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
@@ -203,7 +336,7 @@ def pvp_room(room):
         f_err = 0
         for test in task_test:
             p = subprocess.Popen(
-                ["python", f"submission_{submission_id}.py"],
+                ["python3", f"submission_{submission_id}.py"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -215,9 +348,10 @@ def pvp_room(room):
                 out = out.strip()
                 if err:
                     print(err)
-                    submission_result = SubmissionResults(
-                        submission_id=submission_id,
-                        verdict=err,
+                    submission_result = Submissions(
+                        user_id=current_user.id,
+                        task_id=task_id,
+                        verdict=err.splitlines()[-1],
                         total_tests=test_passed,
                     )
                     f_err = 1
@@ -226,27 +360,31 @@ def pvp_room(room):
                         test_passed += 1
             except subprocess.TimeoutExpired:
                 print("Превышено максимальное время работы")
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="Превышено максимальное время работы",
+                    total_tests=test_passed,
+                )
+                f_err = 1
                 p.kill()
         print(f"Пройдено тестов: {test_passed}")
-        submissions = Submissions(
-            user_id=current_user.id,
-            task_id=task_id,
-        )
         if test_passed == 5:
             print("OK")
-            submission_result = SubmissionResults(
-                submission_id=submission_id,
+            submission_result = Submissions(
+                user_id=current_user.id,
+                task_id=task_id,
                 verdict="OK",
                 total_tests=test_passed,
             )
         elif f_err == 0:
             print("неверный ответ")
-            submission_result = SubmissionResults(
-                submission_id=submission_id,
+            submission_result = Submissions(
+                user_id=current_user.id,
+                task_id=task_id,
                 verdict="Частичное решение",
                 total_tests=test_passed,
             )
-        db_sess.add(submissions)
         db_sess.add(submission_result)
         db_sess.commit()
 
@@ -257,33 +395,23 @@ def pvp_room(room):
             socketio.emit('match_finished', {'result': result}, room=room)
 
         return redirect(f"/pvp/room/{room}")
+
     players_info = []
     for uid_str in matches[room]['players']:
         user = db_sess.get(User, int(uid_str))
         players_info.append({'name': user.name, 'elo': user.elo_rating})
-    last_submission = (
-        db_sess.query(Submissions)
-        .filter(
-            Submissions.user_id == current_user.id,
-            Submissions.task_id == task_id
-        )
-        .order_by(Submissions.id.desc())
-        .first()
-    )
 
+    last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
+                                                        Submissions.task_id == task_id).all()
     if last_submission:
-        last_result = (
-            db_sess.query(SubmissionResults)
-            .filter(SubmissionResults.submission_id == last_submission.id)
-            .first()
-        )
-        if last_result:
-            verdict = last_result.verdict
-        else:
-            verdict = "Результат не найден"
+        result = last_submission[-1]
+        verdict = result.verdict
+        test_passed = result.total_tests
     else:
         verdict = "Нет сданных решений"
-    return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info, verdict=verdict)
+        test_passed = None
+    return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info,
+                           verdict=verdict, test_passed=test_passed)
 
 
 def finish_match(room):

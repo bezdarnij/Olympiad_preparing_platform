@@ -1,0 +1,267 @@
+/* ===== Admin Panel Styles ===== */
+
+/* ===== Add Task Button ===== */
+.btn-task {
+    display: inline-block;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #ffffff !important;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+    transition: all 0.3s ease;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-task::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn-task:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-task:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(5, 150, 105, 0.4);
+    background: linear-gradient(135deg, #047857, #059669);
+    color: #ffffff !important;
+}
+
+/* ===== Users List ===== */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+li {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(168, 85, 247, 0.2);
+    border-radius: 16px;
+    padding: 20px 24px;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    font-size: 15px;
+    color: #4c1d95;
+    font-weight: 500;
+}
+
+li:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.15);
+    border-color: rgba(168, 85, 247, 0.35);
+}
+
+/* ===== User Info Styling ===== */
+li::before {
+    content: '👤';
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+/* ===== Select Dropdowns ===== */
+select {
+    padding: 8px 14px;
+    border: 2px solid rgba(168, 85, 247, 0.3);
+    border-radius: 8px;
+    background: #ffffff;
+    color: #5b21b6;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(124, 58, 237, 0.08);
+    min-width: 100px;
+}
+
+select:hover {
+    border-color: #7c3aed;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.15);
+}
+
+select:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+/* ===== Apply Button ===== */
+#applytBtn {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #ffffff !important;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.35);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    margin-top: 32px;
+    display: block;
+    width: 100%;
+    max-width: 300px;
+}
+
+#applytBtn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+#applytBtn:hover::before {
+    width: 400px;
+    height: 400px;
+}
+
+#applytBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(124, 58, 237, 0.45);
+    background: linear-gradient(135deg, #6d28d9, #7c3aed);
+}
+
+#applytBtn:active {
+    transform: translateY(-1px);
+}
+
+/* ===== User ID Badge ===== */
+li > * {
+    margin: 4px 0;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    li {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 20px;
+        font-size: 14px;
+    }
+
+    select {
+        width: 100%;
+    }
+
+    .btn-task {
+        width: 100%;
+        text-align: center;
+    }
+
+    #applytBtn {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    li {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn-task {
+    animation: fadeIn 0.4s ease-out;
+}
+
+li {
+    animation: fadeIn 0.5s ease-out;
+}
+
+li:nth-child(1) { animation-delay: 0.05s; }
+li:nth-child(2) { animation-delay: 0.1s; }
+li:nth-child(3) { animation-delay: 0.15s; }
+li:nth-child(4) { animation-delay: 0.2s; }
+li:nth-child(5) { animation-delay: 0.25s; }
+li:nth-child(6) { animation-delay: 0.3s; }
+li:nth-child(7) { animation-delay: 0.35s; }
+li:nth-child(8) { animation-delay: 0.4s; }
+li:nth-child(9) { animation-delay: 0.45s; }
+li:nth-child(10) { animation-delay: 0.5s; }
+
+#applytBtn {
+    animation: fadeIn 0.6s ease-out 0.3s backwards;
+}
+
+/* ===== Enhanced User Info Labels ===== */
+li {
+    line-height: 1.8;
+}
+
+/* ===== Status Indicators (optional enhancement) ===== */
+select[value="admin"] {
+    border-color: #7c3aed;
+}
+
+select[value="ban"] {
+    border-color: #dc2626;
+}
+
+/* ===== Loading State for Apply Button ===== */
+#applytBtn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+#applytBtn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

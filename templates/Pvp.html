@@ -1,124 +1,108 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="{{ url_for('static', filename='room/style.css') }}">
-		<title>PvP mode</title>
-		<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-	</head>
-	<body>
-		<header>
-			<nav class="navbar navbar-light bg-light">
-				<a class="navbar-brand" href="/">Наше приложение</a>
-				{% if current_user.is_authenticated %}
-				<a class="navbar-brand" href="/pvp">Pvp режим</a>
-				<a class="navbar-brand" href="/training">Режим тренировки</a>
-				<a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
-				{% else %}
-				<p>
-					<a class="btn btn-primary" href="/register">Зарегистрироваться</a>
-					<a class="btn btn-success" href="/login">Войти</a>
-				</p>
-				{% endif %}
-			</nav>
-		</header>
-		<h1>Режим PvP</h1>
-		<p><strong>ID комнаты:</strong> {{ room }}</p>
-		<div class="condition">
-		  <h2>{{ task.title }}</h2>
-		  <p>{{ task.statement }}</p>
-		  <p>Лимит времени: {{ task.time_limit }}</p>
-		  <p>Лимит памяти: {{ task.memory_limit }}</p>
-		</div>
-		<div class="Input">
-		  <p>{{ task.input_format }}</p>
-		  <p>{{ task.output_format }}</p>
-		  <p>Примеры</p>
-		</div>
-		<div class="Table">
-		  <table>
-			<tr>
-			  <th> input </th>
-			  <th> output </th>
-			</tr>
-			<tr>
-			  <th> {{ test.input_data }} </th>
-			  <th> {{ test.output }} </th>
-			</tr>
-		  </table>
-		</div>
-        <p>Вердикт: {{ verdict }}</p>
-		<div class="task">
-			<form
-				class="send"
-				method="post"
-				enctype="multipart/form-data"
-				id="uploadForm"
-			>
-				<input type="file" accept=".py" name="file" id="pythonFile" required />
-				<button type="submit" id="submitBtn">Отправить</button>
-			</form>
+{% extends "base.html" %}
 
-			<div>
-				<p>Соперник решил задач: <span id="opponent-score">0</span></p>
-				<p>Ты решил задач: <span id="your-score">0</span></p>
-				<p>
-					количество пользователей в комнате <span id="player-count">0</span>
-				</p>
-			</div>
-		</div>
-		<script>
-			const socket = io()
-			const room = '{{ room }}'
-			const myName = '{{ current_user.name }}'
-			socket.emit('join', { room: room })
-			socket.on('update_scores', function (data) {
-				let yourScore = 0
-				let opponentScore = 0
-				for (let i = 0; i < data.scores.length; i++) {
-					if (data.scores[i].name === myName) {
-						yourScore = data.scores[i].score
-					} else {
-						opponentScore = data.scores[i].score
-					}
-				}
-				document.getElementById('your-score').textContent = yourScore
-				document.getElementById('opponent-score').textContent = opponentScore
-				document.getElementById('player-count').textContent = data.player_count
-			})
+{% block title %}PvP Режим{% endblock %}
 
-			document
-				.getElementById('uploadForm')
-				.addEventListener('submit', function (event) {
-					const fileInput = document.getElementById('pythonFile')
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='pvp.css') }}">
+{% endblock %}
 
-					// Проверяем, выбран ли файл
-					if (!fileInput.files || fileInput.files.length === 0) {
-						event.preventDefault()
-						alert('Пожалуйста, выберите файл.')
-						return false
-					}
+{% block content %}
+<h1>Режим PvP</h1>
+<p><strong>ID комнаты:</strong> {{ room }}</p>
 
-					const file = fileInput.files[0]
-					const fileName = file.name
-					const fileExtension = fileName.split('.').pop().toLowerCase()
+<div class="condition">
+    <h2>{{ task.title }}</h2>
+    <p>{{ task.statement }}</p>
+    <p>Лимит времени: {{ task.time_limit }}</p>
+    <p>Лимит памяти: {{ task.memory_limit }}</p>
+</div>
 
-					if (fileExtension !== 'py') {
-						event.preventDefault()
-						alert('Допускаются только файлы с расширением .py')
-						return false
-					}
+<div class="Input">
+    <p>{{ task.input_format }}</p>
+    <p>{{ task.output_format }}</p>
+    <p>Примеры</p>
+</div>
 
-					if (file.size > 1024 * 1024) {
-						// 1MB
-						event.preventDefault()
-						alert('Файл слишком большой. Максимальный размер: 1MB')
-						return false
-					}
+<div class="examples">
+    <div class="example">
+        <p><strong>Input</strong></p>
+        <pre>{{ test.input_data }}</pre>
+    </div>
 
-					return true
-				})
-		</script>
-	</body>
-</html>
+    <div class="example">
+        <p><strong>Output</strong></p>
+        <pre>{{ test.output }}</pre>
+    </div>
+</div>
+
+<p>Вердикт: {{ verdict }}</p>
+{% if test_passed is not none %}
+<p>Пройдено тестов: {{ test_passed }}</p>
+{% endif %}
+
+<div class="task">
+    <form class="send" method="post" enctype="multipart/form-data" id="uploadForm">
+        <input type="file" accept=".py" name="file" id="pythonFile" required />
+        <button type="submit" id="submitBtn">Отправить</button>
+    </form>
+
+    <div class="scores">
+        <p>Соперник решил задач: <span id="opponent-score">0</span></p>
+        <p>Ты решил задач: <span id="your-score">0</span></p>
+        <p>Количество пользователей в комнате: <span id="player-count">0</span></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+const socket = io()
+const room = '{{ room }}'
+const myName = '{{ current_user.name }}'
+
+socket.emit('join', { room: room })
+
+socket.on('update_scores', function (data) {
+    let yourScore = 0
+    let opponentScore = 0
+    for (let i = 0; i < data.scores.length; i++) {
+        if (data.scores[i].name === myName) {
+            yourScore = data.scores[i].score
+        } else {
+            opponentScore = data.scores[i].score
+        }
+    }
+    document.getElementById('your-score').textContent = yourScore
+    document.getElementById('opponent-score').textContent = opponentScore
+    document.getElementById('player-count').textContent = data.player_count
+})
+
+document.getElementById('uploadForm').addEventListener('submit', function (event) {
+    const fileInput = document.getElementById('pythonFile')
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+        event.preventDefault()
+        alert('Пожалуйста, выберите файл.')
+        return false
+    }
+
+    const file = fileInput.files[0]
+    const fileExtension = file.name.split('.').pop().toLowerCase()
+
+    if (fileExtension !== 'py') {
+        event.preventDefault()
+        alert('Допускаются только файлы с расширением .py')
+        return false
+    }
+
+    if (file.size > 1024 * 1024) {
+        event.preventDefault()
+        alert('Файл слишком большой. Максимальный размер: 1MB')
+        return false
+    }
+
+    return true
+})
+</script>
+{% endblock %}

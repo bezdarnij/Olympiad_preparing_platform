@@ -10,6 +10,7 @@ class Tasks(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
+    subject = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
     title = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
     statement = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
     input_format = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
