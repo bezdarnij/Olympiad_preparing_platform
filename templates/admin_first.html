@@ -23,16 +23,27 @@
             <td>{{ user.name }}</td>
             <td>{{user.email}}</td>
             <td>
-                <select>
-                    <option value="admin">admin</option>
-                    <option value="user">user</option>
+                <!-- Select для админских прав -->
+                <select class="admin-select" data-user-id="{{user.id}}">
+                    {% if user.admin == 1 %}
+                        <option value="admin" selected>admin</option>
+                        <option value="user">user</option>
+                    {% else %}
+                        <option value="admin">admin</option>
+                        <option value="user" selected>user</option>
+                    {% endif %}
                 </select>
             </td>
             <td>
-                Ban:
-                <select>
-                    <option value="ban">ban</option>
-                    <option value="unban">unban</option>
+                <!-- Select для бана -->
+                <select class="ban-select" data-user-id="{{user.id}}">
+                    {% if user.ban == 1 %}
+                        <option value="banned" selected>ban</option>
+                        <option value="unbanned">unban</option>
+                    {% else %}
+                        <option value="banned">ban</option>
+                        <option value="unbanned" selected>unban</option>
+                    {% endif %}
                 </select>
             </td>
         </tr>
