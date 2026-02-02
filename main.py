@@ -76,9 +76,9 @@ def index():
 def subject(subject):
     is_subject = 0
     path = request.path.split('/')
-    if path[0] != 'subject':
+    if path[1] != 'subject':
         is_subject = 1
-    return render_template('subject.html', is_subject=is_subject, )
+    return render_template('subject.html', is_subject=is_subject)
 
 
 @app.route('/register', methods=['GET', 'POST'])
