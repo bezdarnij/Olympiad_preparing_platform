@@ -1,34 +1,57 @@
 {% extends "base.html" %}
-
 {% block title %}Admin{% endblock %}
-
-{% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
-{% endblock %}
-
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">{% endblock %}
 {% block content %}
-<div class="container">
-    <h1>Пользователи</h1>
+        <div class="container">
+            <h1>Создание задачи</h1>
+            <form method="post" class="task-form">
+                <div class="form-group">
+                    <label>Название задачи</label>
+                    <input type="text" name="task_name" />
+                </div>
 
-    <table class="users-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Имя пользователя</th>
-                <th>Email</th>
-                <th>Роль</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.role }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+                <div class="form-group">
+                    <label>Лимит памяти</label>
+                    <input type="text" name="memory_limit" />
+                </div>
+
+                <div class="form-group">
+                    <label>Условие задачи</label>
+                    <textarea name="task_description" rows="5"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Входные данные</label>
+                    <textarea name="input_data" rows="2"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Выходные данные</label>
+                    <textarea name="output_data" rows="2"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Примеры</label>
+                    <textarea name="examples" rows="2"></textarea>
+                </div>
+                <fieldset>
+                    <legend>Выберите сложность</legend>
+                    <label>
+                    <input type="radio" name="level">
+                    Лёгкая
+                    </label>
+                    <label>
+                    <input type="radio" name="level"checked>
+                    Средняя
+                    </label>
+                    <label>
+                    <input type="radio" name="level">
+                    Сложная
+                    </label>
+                </fieldset>
+                <div class="form-actions">
+                    <button type="submit">Отправить</button>
+                </div>
+            </form>
+        </div>
 {% endblock %}
