@@ -22,3 +22,4 @@ class Tasks(SqlAlchemyBase):
                                      default=datetime.datetime.now)
     task_tests = orm.relationship("TaskTest", back_populates='tasks')
     submissions = orm.relationship("Submissions", back_populates="tasks")
+    theme = sqlalchemy.Column(sqlalchemy.Text, nullable=True)

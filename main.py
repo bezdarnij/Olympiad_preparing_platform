@@ -60,16 +60,41 @@ def user_ban(func):
 @app.route("/")
 def index():
     db_sess = db_session.create_session()
+    subjects = [s[0] for s in db_sess.query(Tasks.subject).distinct().all() if s[0]]
+    return render_template('index.html', subjects=subjects)
+
+
+@app.route("/tasks")
+@login_required
+@user_ban
+def tasks():
+    db_sess = db_session.create_session()
     sort_by = request.args.get('sort_by')
+    selected_subject = request.args.get('subject')
+
+    query = db_sess.query(Tasks)
+    if selected_subject:
+        query = query.filter(Tasks.subject == selected_subject)
 
     if sort_by == 'difficulty':
-        tasks = db_sess.query(Tasks).order_by(Tasks.difficulty).all()
-    elif sort_by == 'theme':
-        tasks = db_sess.query(Tasks).all()
-    else:
-        tasks = db_sess.query(Tasks).all()
+        tasks = query.order_by(Tasks.difficulty).all()
 
-    return render_template('tasks.html', tasks=tasks)
+    elif sort_by in ('theme', 'alphabet'):  # оба варианта пока ведут к алфавиту
+        # Сортировка по названию задачи по алфавиту (A → Я)
+        tasks = query.order_by(Tasks.title.asc()).all()
+
+    else:
+        tasks = query.all()  # или .order_by(Tasks.created_at.desc()) если хотите по новизне
+
+    subjects = [s[0] for s in db_sess.query(Tasks.subject).distinct().all() if s[0]]
+
+    return render_template(
+        'tasks.html',
+        tasks=tasks,
+        subjects=subjects,
+        selected_subject=selected_subject,
+        sort_by=sort_by
+    )
 
 
 @app.route('/register', methods=['GET', 'POST'])
