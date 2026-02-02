@@ -265,3 +265,146 @@ select[value="ban"] {
         transform: rotate(360deg);
     }
 }
+
+/* admin_first.css */
+
+.table-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 20px auto;
+    overflow-x: auto; /* Для горизонтальной прокрутки на маленьких экранах */
+}
+
+.table-container table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #333;
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовок таблицы */
+.table-container table tr:first-child {
+    background-color: #4a6fa5;
+    color: white;
+    text-align: left;
+}
+
+/* Ячейки заголовка */
+.table-container table tr:first-child td {
+    padding: 16px 20px;
+    font-weight: bold;
+    font-size: 1.1em;
+    border: 1px solid #2a4a75;
+    border-bottom: 2px solid #333;
+}
+
+/* Все строки */
+.table-container table tr {
+    border-bottom: 1px solid #ddd;
+}
+
+/* Все ячейки */
+.table-container table td {
+    padding: 14px 20px;
+    border: 1px solid #ddd;
+    vertical-align: middle;
+}
+
+/* Чередование цвета строк (кроме заголовка) */
+.table-container table tr:nth-child(even):not(:first-child) {
+    background-color: #f8f9fa;
+}
+
+/* Эффект при наведении на строку (кроме заголовка) */
+.table-container table tr:hover:not(:first-child) {
+    background-color: #e9ecef;
+    cursor: pointer;
+}
+
+/* Стили для select внутри таблицы */
+.table-container table select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 0.95em;
+    cursor: pointer;
+}
+
+.table-container table select:hover {
+    border-color: #4a6fa5;
+}
+
+/* Кнопки */
+.btn-task {
+    display: inline-block;
+    margin: 20px;
+    padding: 12px 24px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-task:hover {
+    background-color: #218838;
+}
+
+#applytBtn {
+    display: block;
+    width: 220px;
+    margin: 30px auto;
+    padding: 14px 28px;
+    background-color: #4a6fa5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#applytBtn:hover {
+    background-color: #3a5a8a;
+}
+
+/* Специальные стили для ячеек */
+.table-container table td:first-child {
+    font-weight: bold;
+    color: #555;
+}
+
+.table-container table td:nth-child(3) {
+    color: #3498db;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .table-container {
+        margin: 10px;
+    }
+
+    .table-container table {
+        font-size: 0.9em;
+    }
+
+    .table-container table td {
+        padding: 10px 12px;
+    }
+
+    .table-container table tr:first-child td {
+        padding: 12px 14px;
+    }
+
+    .btn-task {
+        margin: 10px;
+        padding: 10px 20px;
+        width: calc(100% - 20px);
+    }
+}
