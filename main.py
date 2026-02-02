@@ -72,6 +72,15 @@ def index():
     return render_template('tasks.html', tasks=tasks)
 
 
+@app.route("/<string:subject>", methods=['GET', 'POST'])
+def subject(subject):
+    is_subject = 0
+    path = request.path.split('/')
+    if path[0] != 'subject':
+        is_subject = 1
+    return render_template('subject.html', is_subject=is_subject, )
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
     form = RegisterForm()
