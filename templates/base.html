@@ -19,7 +19,10 @@
 
         <div class="nav-right">
             {% if current_user.is_authenticated %}
+                {% if is_subject %}
+                <a class="nav-link" href="/subject">Выбор предмета</a>
                 <a class="nav-link" href="/pvp">PvP</a>
+                {% endif %}
                 <a class="nav-link" href="/profile">Профиль</a>
                 {% if current_user.admin %}
                     <a class="btn btn-admin" href="/admin">Админ-панель</a>
