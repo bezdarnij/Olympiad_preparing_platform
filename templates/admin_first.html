@@ -4,12 +4,52 @@
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='admin_first.css') }}">
 {% endblock %}
+
 {% block content %}
 <a class="btn btn-task" href="/admin/task">Добавить задачу</a>
-<ul>
-    {% for user in users %}
-        <li>ID: {{user.id}}, {{ user.name }}, Email: {{user.email}}, Admin: <select><option value="admin">admin</option><option value="user">user</option></select>, Ban: <select><option value="ban">ban</option><option value="ban">unban</option></select></li>
-    {% endfor %}
-</ul>
+
+<div class="table-container">
+    <table>
+        <tr>
+            <td>id</td>
+            <td>name</td>
+            <td>email</td>
+            <td>admin</td>
+            <td>ban</td>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{user.id}}</td>
+            <td>{{ user.name }}</td>
+            <td>{{user.email}}</td>
+            <td>
+                <!-- Select для админских прав -->
+                <select class="admin-select" data-user-id="{{user.id}}">
+                    {% if user.admin == 1 %}
+                        <option value="admin" selected>admin</option>
+                        <option value="user">user</option>
+                    {% else %}
+                        <option value="admin">admin</option>
+                        <option value="user" selected>user</option>
+                    {% endif %}
+                </select>
+            </td>
+            <td>
+                <!-- Select для бана -->
+                <select class="ban-select" data-user-id="{{user.id}}">
+                    {% if user.ban == 1 %}
+                        <option value="banned" selected>ban</option>
+                        <option value="unbanned">unban</option>
+                    {% else %}
+                        <option value="banned">ban</option>
+                        <option value="unbanned" selected>unban</option>
+                    {% endif %}
+                </select>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
 <button type="button" id="applytBtn">Применить</button>
 {% endblock %}
