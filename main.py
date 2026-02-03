@@ -79,12 +79,11 @@ def tasks():
     if sort_by == 'difficulty':
         tasks = query.order_by(Tasks.difficulty).all()
 
-    elif sort_by in ('theme', 'alphabet'):  # оба варианта пока ведут к алфавиту
-        # Сортировка по названию задачи по алфавиту (A → Я)
+    elif sort_by in ('theme', 'alphabet'):
         tasks = query.order_by(Tasks.title.asc()).all()
 
     else:
-        tasks = query.all()  # или .order_by(Tasks.created_at.desc()) если хотите по новизне
+        tasks = query.all()
 
     subjects = [s[0] for s in db_sess.query(Tasks.subject).distinct().all() if s[0]]
 
