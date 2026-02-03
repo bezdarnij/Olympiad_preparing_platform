@@ -273,80 +273,106 @@ def training(subject, task_id):
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
     submission = db_sess.query(Submissions).filter(Submissions.task_id == task.id).all()
     submission_id = len(submission) + 1
-    if request.method == "POST":
-        file = request.files.get("file")
-        if not file or file.filename == "":
-            abort(400, "Файл не выбран")
-        file.filename = f"submission_{submission_id}.py"
-        os.makedirs(f"submissions_training/submissions_{current_user.id}/task_{task_id}", exist_ok=True)
-        file.save(os.path.join(f"submissions_training/submissions_{current_user.id}/task_{task_id}", file.filename))
+    if subject == 'информатика':
+        if request.method == "POST":
+            file = request.files.get("file")
+            if not file or file.filename == "":
+                abort(400, "Файл не выбран")
+            file.filename = f"submission_{submission_id}.py"
+            os.makedirs(f"submissions_training/submissions_{current_user.id}/task_{task_id}", exist_ok=True)
+            file.save(os.path.join(f"submissions_training/submissions_{current_user.id}/task_{task_id}", file.filename))
 
-        # judge
-        test_passed = 0
-        f_err = 0
-        for test in task_test:
-            p = subprocess.Popen(
-                ["python", f"submission_{submission_id}.py"],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                cwd=f"submissions_training/submissions_{current_user.id}/task_{task_id}"
-            )
-            try:
-                out, err = p.communicate(test.input_data, timeout=task.time_limit)
-                out = out.strip()
-                if err:
-                    print(err)
+            # judge
+            test_passed = 0
+            f_err = 0
+            for test in task_test:
+                p = subprocess.Popen(
+                    ["python", f"submission_{submission_id}.py"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    cwd=f"submissions_training/submissions_{current_user.id}/task_{task_id}"
+                )
+                try:
+                    out, err = p.communicate(test.input_data, timeout=task.time_limit)
+                    out = out.strip()
+                    if err:
+                        print(err)
+                        submission_result = Submissions(
+                            user_id=current_user.id,
+                            task_id=task_id,
+                            verdict=err.splitlines()[-1],
+                            total_tests=test_passed,
+                        )
+                        f_err = 1
+                    else:
+                        if out == test.output.strip():
+                            test_passed += 1
+                except subprocess.TimeoutExpired:
+                    print("Превышено максимальное время работы")
                     submission_result = Submissions(
                         user_id=current_user.id,
                         task_id=task_id,
-                        verdict=err.splitlines()[-1],
+                        verdict="Превышено максимальное время работы",
                         total_tests=test_passed,
                     )
                     f_err = 1
-                else:
-                    if out == test.output.strip():
-                        test_passed += 1
-            except subprocess.TimeoutExpired:
-                print("Превышено максимальное время работы")
+                    p.kill()
+            print(f"Пройдено тестов: {test_passed}")
+            if test_passed == 5:
+                print("OK")
                 submission_result = Submissions(
                     user_id=current_user.id,
                     task_id=task_id,
-                    verdict="Превышено максимальное время работы",
+                    verdict="OK",
                     total_tests=test_passed,
                 )
-                f_err = 1
-                p.kill()
-        print(f"Пройдено тестов: {test_passed}")
-        if test_passed == 5:
-            print("OK")
-            submission_result = Submissions(
-                user_id=current_user.id,
-                task_id=task_id,
-                verdict="OK",
-                total_tests=test_passed,
-            )
-        elif f_err == 0:
-            print("неверный ответ")
-            submission_result = Submissions(
-                user_id=current_user.id,
-                task_id=task_id,
-                verdict="Частичное решение",
-                total_tests=test_passed,
-            )
-        db_sess.add(submission_result)
-        db_sess.commit()
-    last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
-                                                        Submissions.task_id == task_id).all()
-    if last_submission:
-        result = last_submission[-1]
-        verdict = result.verdict
-        test_passed = result.total_tests
+            elif f_err == 0:
+                print("неверный ответ")
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="Частичное решение",
+                    total_tests=test_passed,
+                )
+            db_sess.add(submission_result)
+            db_sess.commit()
+        last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
+                                                            Submissions.task_id == task_id).all()
+        if last_submission:
+            result = last_submission[-1]
+            verdict = result.verdict
+            test_passed = result.total_tests
+        else:
+            verdict = "Нет сданных решений"
+            test_passed = None
+        return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed, subject=subject)
     else:
-        verdict = "Нет сданных решений"
-        test_passed = None
-    return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed, subject=subject)
+        if request.method == "POST":
+            answer = request.form.get("answer")
+            if task_test[0].input_data == answer:
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="OK",
+                )
+            else:
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="Неверный ответ, попробуйте снова",
+                )
+            db_sess.add(submission_result)
+            db_sess.commit()
+        last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
+                                                    Submissions.task_id == task_id).all()
+        if last_submission:
+            result = last_submission[-1]
+            verdict = result.verdict
+        else:
+            verdict = "Нет сданных решений"
+        return render_template('training_other.html', task=task, verdict=verdict, subject=subject)
 
 
 @app.route('/<subject>/pvp/room/<room>', methods=["GET", "POST"])
@@ -359,95 +385,119 @@ def pvp_room(subject, room):
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
     submission = db_sess.query(Submissions).filter(Submissions.task_id == task.id).all()
     submission_id = len(submission) + 1
-    if request.method == "POST":
-        file = request.files.get("file")
-        if not file or file.filename == "":
-            abort(400, "Файл не выбран")
-        file.filename = f"submission_{submission_id}.py"
-        os.makedirs(f"submissions_pvp/submissions_{current_user.id}/task_{task_id}", exist_ok=True)
-        file.save(os.path.join(f"submissions_pvp/submissions_{current_user.id}/task_{task_id}", file.filename))
+    if subject == 'информатика':
+        if request.method == "POST":
+            file = request.files.get("file")
+            if not file or file.filename == "":
+                abort(400, "Файл не выбран")
+            file.filename = f"submission_{submission_id}.py"
+            os.makedirs(f"submissions_pvp/submissions_{current_user.id}/task_{task_id}", exist_ok=True)
+            file.save(os.path.join(f"submissions_pvp/submissions_{current_user.id}/task_{task_id}", file.filename))
 
-        # judge
-        test_passed = 0
-        f_err = 0
-        for test in task_test:
-            p = subprocess.Popen(
-                ["python3", f"submission_{submission_id}.py"],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                cwd=f"submissions_pvp/submissions_{current_user.id}/task_{task_id}"
-            )
-            try:
-                out, err = p.communicate(test.input_data, timeout=task.time_limit)
-                out = out.strip()
-                if err:
-                    print(err)
+            # judge
+            test_passed = 0
+            f_err = 0
+            for test in task_test:
+                p = subprocess.Popen(
+                    ["python3", f"submission_{submission_id}.py"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    cwd=f"submissions_pvp/submissions_{current_user.id}/task_{task_id}"
+                )
+                try:
+                    out, err = p.communicate(test.input_data, timeout=task.time_limit)
+                    out = out.strip()
+                    if err:
+                        print(err)
+                        submission_result = Submissions(
+                            user_id=current_user.id,
+                            task_id=task_id,
+                            verdict=err.splitlines()[-1],
+                            total_tests=test_passed,
+                        )
+                        f_err = 1
+                    else:
+                        if out == test.output.strip():
+                            test_passed += 1
+                except subprocess.TimeoutExpired:
+                    print("Превышено максимальное время работы")
                     submission_result = Submissions(
                         user_id=current_user.id,
                         task_id=task_id,
-                        verdict=err.splitlines()[-1],
+                        verdict="Превышено максимальное время работы",
                         total_tests=test_passed,
                     )
                     f_err = 1
-                else:
-                    if out == test.output.strip():
-                        test_passed += 1
-            except subprocess.TimeoutExpired:
-                print("Превышено максимальное время работы")
+                    p.kill()
+            print(f"Пройдено тестов: {test_passed}")
+            if test_passed == 5:
+                print("OK")
                 submission_result = Submissions(
                     user_id=current_user.id,
                     task_id=task_id,
-                    verdict="Превышено максимальное время работы",
+                    verdict="OK",
                     total_tests=test_passed,
                 )
-                f_err = 1
-                p.kill()
-        print(f"Пройдено тестов: {test_passed}")
-        if test_passed == 5:
-            print("OK")
-            submission_result = Submissions(
-                user_id=current_user.id,
-                task_id=task_id,
-                verdict="OK",
-                total_tests=test_passed,
-            )
-        elif f_err == 0:
-            print("неверный ответ")
-            submission_result = Submissions(
-                user_id=current_user.id,
-                task_id=task_id,
-                verdict="Частичное решение",
-                total_tests=test_passed,
-            )
-        db_sess.add(submission_result)
-        db_sess.commit()
+            elif f_err == 0:
+                print("неверный ответ")
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="Частичное решение",
+                    total_tests=test_passed,
+                )
+            db_sess.add(submission_result)
+            db_sess.commit()
 
-        uid = str(current_user.id)
-        matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), test_passed)
-        if len(matches[room]['completed']) == 2 and not matches[room].get('finished'):
-            result = finish_match(room)
-            socketio.emit('match_finished', {'result': result}, room=room)
+            uid = str(current_user.id)
+            matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), test_passed)
+            if len(matches[room]['completed']) == 2 and not matches[room].get('finished'):
+                result = finish_match(room)
+                socketio.emit('match_finished', {'result': result}, room=room)
 
-        return redirect(f"/{subject}/pvp/room/{room}")
+            return redirect(f"/{subject}/pvp/room/{room}")
 
-    players_info = []
-    for uid_str in matches[room]['players']:
-        user = db_sess.get(User, int(uid_str))
-        players_info.append({'name': user.name, 'elo': user.elo_rating})
+        players_info = []
+        for uid_str in matches[room]['players']:
+            user = db_sess.get(User, int(uid_str))
+            players_info.append({'name': user.name, 'elo': user.elo_rating})
 
-    last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
-                                                        Submissions.task_id == task_id).all()
-    if last_submission:
-        result = last_submission[-1]
-        verdict = result.verdict
-        test_passed = result.total_tests
+        last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
+                                                            Submissions.task_id == task_id).all()
+        if last_submission:
+            result = last_submission[-1]
+            verdict = result.verdict
+            test_passed = result.total_tests
+        else:
+            verdict = "Нет сданных решений"
+            test_passed = None
+        return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info,
+                            verdict=verdict, test_passed=test_passed, subject=subject)
     else:
-        verdict = "Нет сданных решений"
-        test_passed = None
-    return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info,
-                           verdict=verdict, test_passed=test_passed, subject=subject)
+        if request.method == "POST":
+            answer = request.form.get("answer")
+            if task_test[0].input_data == answer:
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="OK",
+                )
+            else:
+                submission_result = Submissions(
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    verdict="Неверный ответ, попробуйте снова",
+                )
+        last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
+                                                    Submissions.task_id == task_id).all()
+        if last_submission:
+            result = last_submission[-1]
+            verdict = result.verdict
+        else:
+            verdict = "Нет сданных решений"
+        return render_template('training_other.html', task=task, verdict=verdict, subject=subject)
 
 
 def finish_match(room):
