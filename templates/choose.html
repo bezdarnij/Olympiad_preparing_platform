@@ -33,6 +33,7 @@
 <script>
     function joinByCode() {
         const code = document.getElementById('roomCode').value.trim()
+        const subject = "{{ subject }}"
 
         if (!code) {
             alert('Введите код комнаты')

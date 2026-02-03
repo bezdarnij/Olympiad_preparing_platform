@@ -57,6 +57,11 @@ def user_ban(func):
     return wrapper
 
 
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
+
 @app.route("/")
 @app.route("/<subject>/")
 def index(subject=None):
@@ -193,6 +198,20 @@ def admin():
     subject = session.get('subject')
     db_sess = db_session.create_session()
     users = db_sess.query(User)
+    if request.method == "POST":
+        for user in users:
+            admin_value = request.form.get(f"admin_{user.id}")
+            ban_value = request.form.get(f"ban_{user.id}")
+            if admin_value == "admin":
+                user.admin = 1
+            if admin_value == "user":
+                user.admin = 0
+            if ban_value == "banned":
+                user.ban = 1
+            if ban_value == "unbanned":
+                user.ban = 0
+        db_sess.commit()
+        return redirect('/admin')
     return render_template("admin_first.html", users=users, subject=subject)
 
 
@@ -227,7 +246,7 @@ def join_pvp(subject, room):
     if len(matches[room]['players']) >= 2:
         return "комната заполнена", 400
     if current_user.id in matches[room]['players']:
-        return redirect(f'/pvp/room/{room}')
+        return redirect(f'/{subject}/pvp/room/{room}')
     matches[room]['players'].append(current_user.id)
     matches[room]['completed'][str(current_user.id)] = 0
     session['room'] = room
@@ -327,7 +346,7 @@ def training(subject, task_id):
     else:
         verdict = "Нет сданных решений"
         test_passed = None
-    return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed)
+    return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed, subject=subject)
 
 
 @app.route('/<subject>/pvp/room/<room>', methods=["GET", "POST"])
@@ -428,7 +447,7 @@ def pvp_room(subject, room):
         verdict = "Нет сданных решений"
         test_passed = None
     return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info,
-                           verdict=verdict, test_passed=test_passed)
+                           verdict=verdict, test_passed=test_passed, subject=subject)
 
 
 def finish_match(room):
