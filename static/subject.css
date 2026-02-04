@@ -1,0 +1,241 @@
+/* ===== Subject Selection Page Styles ===== */
+
+/* ===== Main Title ===== */
+h1 {
+    font-size: 36px;
+    font-weight: 800;
+    text-align: center;
+    margin: 0 0 48px 0;
+    background: linear-gradient(135deg, #6d28d9, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===== Subject Links Container ===== */
+.page-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ===== Subject Cards ===== */
+.page-content > a {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(168, 85, 247, 0.2);
+    border-radius: 18px;
+    padding: 32px 24px;
+    text-align: center;
+    text-decoration: none;
+    color: #5b21b6;
+    font-size: 20px;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+}
+
+/* ===== Subject Icons ===== */
+.page-content > a::before {
+    content: '';
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.page-content > a[href*="информатика"]::before {
+    content: '💻';
+}
+
+.page-content > a[href*="математика"]::before {
+    content: '📐';
+}
+
+.page-content > a[href*="русский"]::before {
+    content: '📚';
+}
+
+.page-content > a[href*="химия"]::before {
+    content: '🧪';
+}
+
+.page-content > a[href*="английский"]::before {
+    content: '🌍';
+}
+
+.page-content > a[href*="биология"]::before {
+    content: '🧬';
+}
+
+/* ===== Hover Effects ===== */
+.page-content > a::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 16px;
+}
+
+.page-content > a:hover::after {
+    opacity: 1;
+}
+
+.page-content > a:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(124, 58, 237, 0.25);
+    border-color: rgba(168, 85, 247, 0.4);
+    color: #7c3aed;
+}
+
+/* ===== Active/Focus States ===== */
+.page-content > a:active {
+    transform: translateY(-4px) scale(1);
+}
+
+.page-content > a:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2);
+}
+
+/* ===== Specific Subject Colors (optional accent) ===== */
+.page-content > a[href*="информатика"]:hover {
+    border-color: #3b82f6;
+    color: #2563eb;
+}
+
+.page-content > a[href*="математика"]:hover {
+    border-color: #f59e0b;
+    color: #d97706;
+}
+
+.page-content > a[href*="русский"]:hover {
+    border-color: #dc2626;
+    color: #b91c1c;
+}
+
+.page-content > a[href*="химия"]:hover {
+    border-color: #10b981;
+    color: #059669;
+}
+
+.page-content > a[href*="английский"]:hover {
+    border-color: #8b5cf6;
+    color: #7c3aed;
+}
+
+.page-content > a[href*="биология"]:hover {
+    border-color: #14b8a6;
+    color: #0d9488;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 28px;
+        margin-bottom: 32px;
+    }
+    
+    .page-content {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px;
+    }
+    
+    .page-content > a {
+        padding: 28px 20px;
+        font-size: 18px;
+        min-height: 120px;
+    }
+    
+    .page-content > a::before {
+        font-size: 40px;
+        margin-bottom: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 24px;
+    }
+    
+    .page-content > a {
+        padding: 24px 16px;
+        font-size: 16px;
+        min-height: 100px;
+    }
+    
+    .page-content > a::before {
+        font-size: 36px;
+    }
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+h1 {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.page-content > a {
+    animation: fadeIn 0.6s ease-out backwards;
+}
+
+.page-content > a:nth-child(2) { animation-delay: 0.1s; }
+.page-content > a:nth-child(3) { animation-delay: 0.15s; }
+.page-content > a:nth-child(4) { animation-delay: 0.2s; }
+.page-content > a:nth-child(5) { animation-delay: 0.25s; }
+.page-content > a:nth-child(6) { animation-delay: 0.3s; }
+.page-content > a:nth-child(7) { animation-delay: 0.35s; }
+
+/* ===== Icon Animation on Hover ===== */
+.page-content > a:hover::before {
+    animation: pulse 0.6s ease-in-out;
+}
+
+/* ===== Grid Layout Alternative (2 columns) ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .page-content {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 700px;
+    }
+}
+
+/* ===== Large Screen Layout (3 columns) ===== */
+@media (min-width: 1025px) {
+    .page-content {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

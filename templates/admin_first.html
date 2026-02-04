@@ -8,6 +8,7 @@
 {% block content %}
 <a class="btn btn-task" href="/admin/task">Добавить задачу</a>
 
+<form method="post" action="/admin">
 <div class="table-container">
     <table>
         <tr>
@@ -23,8 +24,7 @@
             <td>{{ user.name }}</td>
             <td>{{user.email}}</td>
             <td>
-                <!-- Select для админских прав -->
-                <select class="admin-select" data-user-id="{{user.id}}">
+                <select class="admin-select" name="admin_{{user.id}}">
                     {% if user.admin == 1 %}
                         <option value="admin" selected>admin</option>
                         <option value="user">user</option>
@@ -35,14 +35,13 @@
                 </select>
             </td>
             <td>
-                <!-- Select для бана -->
-                <select class="ban-select" data-user-id="{{user.id}}">
+                <select class="ban-select" name="ban_{{user.id}}">
                     {% if user.ban == 1 %}
-                        <option value="banned" selected>ban</option>
-                        <option value="unbanned">unban</option>
+                        <option value="banned" selected>banned</option>
+                        <option value="unbanned">unbanned</option>
                     {% else %}
-                        <option value="banned">ban</option>
-                        <option value="unbanned" selected>unban</option>
+                        <option value="banned">banned</option>
+                        <option value="unbanned" selected>unbanned</option>
                     {% endif %}
                 </select>
             </td>
@@ -51,5 +50,6 @@
     </table>
 </div>
 
-<button type="button" id="applytBtn">Применить</button>
+<button type="submit" id="applytBtn">Применить</button>
+</form>
 {% endblock %}

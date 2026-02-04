@@ -5,31 +5,23 @@
 {% endblock %}
 
 {% block content %}
-<h1>Каталог задач {% if selected_subject %}по предмету "{{ selected_subject }}"{% endif %}</h1>
-<form method="get" action="/tasks">
-    <select name="subject">
-        <option value="">Все предметы</option>
-        {% for sub in subjects %}
-            <option value="{{ sub }}" {% if sub == selected_subject %}selected{% endif %}>{{ sub }}</option>
-        {% endfor %}
+<h1>Каталог задач</h1>
+<form method="get">
+    <select name="sort_by">
+        <option value="difficulty">Сложности</option>
+        <option value="theme">Темe</option>
     </select>
-   <select name="sort_by">
-    <option value="difficulty" {% if sort_by == 'difficulty' %}selected{% endif %}>По сложности</option>
-    <option value="alphabet"   {% if sort_by in ('theme', 'alphabet') %}selected{% endif %}>
-        По теме
-    </option>
-    </select>
-    <button type="submit" class="btn btn-secondary">Применить</button>
+    <button type="submit" class="btn btn-secondary">Сортировать</button>
 </form>
 {% if tasks %}
     {% for task in tasks %}
     <div class="col-md-6 border rounded" style="margin-bottom: 20px;">
         <li>
-          <a href="{{ url_for('training', task_id=task.id) }}">
+          <a href="{{ url_for('training', subject=subject, task_id=task.id) }}">
             {{ task.title }}
           </a>
         </li>
-        <p>Тема: {{ task.theme or 'Не указана' }}</p>
+        <p>Предмет: {{ task.subject or 'Не указан' }}</p>
         <p>Сложность: {{ task.difficulty or 'Не указана' }}</p>
     </div>
     {% endfor %}

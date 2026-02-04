@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Training{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='train.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Режим тренировки</h1>
+
+<div class="condition">
+    <h2>{{ task.title }}</h2>
+    <p>{{ task.statement }}</p>
+</div>
+
+<div class="task">
+    <form class="send" method="post">
+        <div class="answer_field">
+            <label>Введите ответ: </label>
+            <input type="text" name="answer" />
+        </div>
+        <button type="submit" id="submitBtn">Отправить ответ</button>
+    </form>
+</div>
+
+<p>Вердикт: {{ verdict }}</p>
+
+{% endblock %}

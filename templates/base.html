@@ -14,12 +14,20 @@
 <header class="site-header">
     <nav class="navbar">
         <div class="nav-left">
+            {% if session.get('subject') %}
+            <a class="logo" href="/{{ subject }}/">На главную</a>
+            {% else %}
             <a class="logo" href="/">На главную</a>
+            {% endif %}
         </div>
 
         <div class="nav-right">
             {% if current_user.is_authenticated %}
-                <a class="nav-link" href="/pvp">PvP</a>
+                {% if subject != 'subject' and subject != None %}
+                <p>Вы выбрали предмет: {{ subject }}</p>
+                <a class="nav-link" href="/subject">Выбор предмета</a>
+                <a class="nav-link" href="/{{ subject }}/pvp">PvP</a>
+                {% endif %}
                 <a class="nav-link" href="/profile">Профиль</a>
                 {% if current_user.admin %}
                     <a class="btn btn-admin" href="/admin">Админ-панель</a>
