@@ -18,6 +18,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Условие задачи</label>
+                    <textarea name="task_description" rows="5"></textarea>
+                </div>
+                {% if subject_admin == 'информатика' %}
+                <div class="form-group">
                     <label>Лимит памяти</label>
                     <input type="text" name="memory_limit" />
                 </div>
@@ -27,10 +32,6 @@
                     <input type="text" name="time_limit" />
                 </div>
 
-                <div class="form-group">
-                    <label>Условие задачи</label>
-                    <textarea name="task_description" rows="5"></textarea>
-                </div>
                 <div class="form-group">
                     <label>Входные данные</label>
                     <textarea name="input_data" rows="2"></textarea>
@@ -80,7 +81,14 @@
                         <textarea name="test5_output" rows="2" placeholder="Выходные данные"></textarea>
                     </div>
                 </div>
-
+                {% else %}
+                <div class="form-group">
+                    <label>Ответ</label>
+                    <div class="test-pair">
+                        <textarea name="test_input" rows="2" placeholder="Ответ"></textarea>
+                    </div>
+                </div>
+                {% endif %}
                 <fieldset>
                     <legend>Выберите сложность</legend>
                     <label>

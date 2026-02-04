@@ -66,8 +66,7 @@ def favicon():
 @app.route("/<subject>/")
 def index(subject=None):
     if request.path == '/' or 'subject' in request.path:
-        return redirect('/subject')
-
+        return redirect('/subject/choice')
     db_sess = db_session.create_session()
     sort_by = request.args.get('sort_by')
 
@@ -94,7 +93,7 @@ def index(subject=None):
                            selected_themes=selected_themes, sort_by=sort_by)
 
 
-@app.route("/<subject>", methods=['GET', 'POST'])
+@app.route("/<subject>/choice", methods=['GET', 'POST'])
 def subject(subject):
     session['subject'] = "subject"
     path = request.path.split('/')
@@ -210,7 +209,7 @@ def profile(user_id=None):
 @admin_required
 @user_ban
 def admin():
-    subject = session.get('subject')
+    subject = session['subject']
     db_sess = db_session.create_session()
     users = db_sess.query(User)
     if request.method == "POST":
@@ -248,7 +247,6 @@ def admin_task(subject_admin):
     if subject_admin == 'информатика':
         if request.method == "POST":
             db_sess = db_session.create_session()
-            subject_name = request.form.get("subject")
             task_name = request.form.get("task_name")
             memory_limit = request.form.get("memory_limit")
             time_limit = request.form.get("time_limit")
@@ -264,7 +262,7 @@ def admin_task(subject_admin):
             test_list.append((request.form.get("test4_input"), request.form.get("test4_output")))
             test_list.append((request.form.get("test5_input"), request.form.get("test5_output")))
             task = Tasks(
-                subject=subject_name,
+                subject=subject_admin,
                 title=task_name,
                 statement=task_description,
                 input_format=input_data,
@@ -282,6 +280,28 @@ def admin_task(subject_admin):
                     output=test_list[i][1],
                 )
                 db_sess.add(task_test)
+            db_sess.add(task)
+            db_sess.commit()
+    else:
+        if request.method == "POST":
+            db_sess = db_session.create_session()
+            task_name = request.form.get("task_name")
+            task_description = request.form.get("task_description")
+            level = request.form.get("level")
+            theme = request.form.get("theme")
+            task = Tasks(
+                subject=subject_admin,
+                title=task_name,
+                statement=task_description,
+                difficulty=level,
+                theme=theme
+            )
+            task_id = db_sess.query(Tasks).all()[-1].id + 1
+            task_test = TaskTest(
+                task_id=task_id,
+                input_data=request.form.get("test_input"),
+            )
+            db_sess.add(task_test)
             db_sess.add(task)
             db_sess.commit()
     return render_template("admin_task.html", subject_admin=subject_admin, subject=subject)
@@ -413,8 +433,8 @@ def training(subject, task_id):
         return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed, subject=subject)
     else:
         if request.method == "POST":
-            answer = request.form.get("answer")
-            if task_test[0].input_data == answer:
+            answer = request.form.get("answer").lower()
+            if task_test[0].input_data.lower() == answer:
                 submission_result = Submissions(
                     user_id=current_user.id,
                     task_id=task_id,
@@ -540,8 +560,8 @@ def pvp_room(subject, room):
                             verdict=verdict, test_passed=test_passed, subject=subject)
     else:
         if request.method == "POST":
-            answer = request.form.get("answer")
-            if task_test[0].input_data == answer:
+            answer = request.form.get("answer").lower()
+            if task_test[0].input_data.lower() == answer:
                 submission_result = Submissions(
                     user_id=current_user.id,
                     task_id=task_id,
