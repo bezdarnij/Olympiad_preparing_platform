@@ -3,10 +3,10 @@
 {% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='subject.css') }}">{% endblock %}
 {% block content %}
 <h1>Выберите предмет</h1>
-<a href="{{ url_for('subject', subject='информатика') }}">Информатика</a>
-<a href="{{ url_for('subject', subject='математика') }}">Математика</a>
-<a href="{{ url_for('subject', subject='русский язык') }}">Русский язык</a>
-<a href="{{ url_for('subject', subject='химия') }}">Химия</a>
-<a href="{{ url_for('subject', subject='английский язык') }}">Английский язык</a>
-<a href="{{ url_for('subject', subject='биология') }}">Биология</a>
+<a href="/информатика/">Информатика</a>
+<a href="/математика/">Математика</a>
+<a href="/русский язык/">Русский язык</a>
+<a href="/химия/">Химия</a>
+<a href="/английский язык/">Английский язык</a>
+<a href="/биология/">Биология</a>
 {% endblock %}
