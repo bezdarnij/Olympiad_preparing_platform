@@ -65,19 +65,29 @@ def favicon():
 @app.route("/")
 @app.route("/<subject>/")
 def index(subject=None):
+    if subject:
+        session['subject'] = subject
+    subject_1 = session.get('subject')
+
+    if not subject_1:
+        return redirect('/subject')
+
     if request.path == '/' or 'subject' in request.path:
         return redirect('/subject')
+
     db_sess = db_session.create_session()
     sort_by = request.args.get('sort_by')
 
-    if sort_by == 'difficulty':
-        tasks = db_sess.query(Tasks).order_by(Tasks.difficulty).all()
-    elif sort_by == 'theme':
-        tasks = db_sess.query(Tasks).all()
-    else:
-        tasks = db_sess.query(Tasks).all()
+    query = db_sess.query(Tasks).filter(Tasks.subject == subject_1)
 
-    return render_template('tasks.html', tasks=tasks, subject=subject)
+    if sort_by == 'difficulty':
+        tasks = query.order_by(Tasks.difficulty).all()
+    elif sort_by == 'theme':
+        tasks = query.all()
+    else:
+        tasks = query.all()
+
+    return render_template('tasks.html', tasks=tasks, subject=subject_1)
 
 
 @app.route("/<subject>", methods=['GET', 'POST'])
