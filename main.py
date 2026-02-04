@@ -87,7 +87,7 @@ def subject(subject):
     if path[1] != 'subject':
         session['subject'] = path[1]
         return redirect(f"/{subject}/")
-    return render_template('subject.html',  subject=subject)
+    return render_template('subject.html', subject=subject)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -197,21 +197,32 @@ def profile(user_id=None):
 def admin():
     subject = session.get('subject')
     db_sess = db_session.create_session()
-    users = db_sess.query(User)
+    users = db_sess.query(User).all()
+
     if request.method == "POST":
+        changes_made = False
+
         for user in users:
             admin_value = request.form.get(f"admin_{user.id}")
             ban_value = request.form.get(f"ban_{user.id}")
-            if admin_value == "admin":
-                user.admin = 1
-            if admin_value == "user":
-                user.admin = 0
-            if ban_value == "banned":
-                user.ban = 1
-            if ban_value == "unbanned":
-                user.ban = 0
-        db_sess.commit()
+
+            new_admin = admin_value == "admin"
+            new_ban = ban_value == "banned"
+
+            if user.admin != new_admin or user.ban != new_ban:
+                print(f"Обновление пользователя {user.id} ({user.name}): "
+                      f"admin={user.admin}->{new_admin}, ban={user.ban}->{new_ban}")
+
+                user.admin = new_admin
+                user.ban = new_ban
+                changes_made = True
+
+        if changes_made:
+            db_sess.commit()
+            print(f"Изменения сохранены в БД")
+
         return redirect('/admin')
+
     return render_template("admin_first.html", users=users, subject=subject)
 
 
@@ -347,7 +358,8 @@ def training(subject, task_id):
         else:
             verdict = "Нет сданных решений"
             test_passed = None
-        return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed, subject=subject)
+        return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed,
+                               subject=subject)
     else:
         if request.method == "POST":
             answer = request.form.get("answer")
@@ -366,7 +378,7 @@ def training(subject, task_id):
             db_sess.add(submission_result)
             db_sess.commit()
         last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
-                                                    Submissions.task_id == task_id).all()
+                                                            Submissions.task_id == task_id).all()
         if last_submission:
             result = last_submission[-1]
             verdict = result.verdict
@@ -474,7 +486,7 @@ def pvp_room(subject, room):
             verdict = "Нет сданных решений"
             test_passed = None
         return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info,
-                            verdict=verdict, test_passed=test_passed, subject=subject)
+                               verdict=verdict, test_passed=test_passed, subject=subject)
     else:
         if request.method == "POST":
             answer = request.form.get("answer")
@@ -491,7 +503,7 @@ def pvp_room(subject, room):
                     verdict="Неверный ответ, попробуйте снова",
                 )
         last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
-                                                    Submissions.task_id == task_id).all()
+                                                            Submissions.task_id == task_id).all()
         if last_submission:
             result = last_submission[-1]
             verdict = result.verdict
