@@ -64,30 +64,46 @@ def favicon():
 
 @app.route("/")
 @app.route("/<subject>/")
+@user_ban
 def index(subject=None):
     if request.path == '/' or 'subject' in request.path:
         return redirect('/subject')
+
     db_sess = db_session.create_session()
     sort_by = request.args.get('sort_by')
 
-    if sort_by == 'difficulty':
-        tasks = db_sess.query(Tasks).order_by(Tasks.difficulty).all()
-    elif sort_by == 'theme':
-        tasks = db_sess.query(Tasks).all()
-    else:
-        tasks = db_sess.query(Tasks).all()
+    difficulties = db_sess.query(Tasks.difficulty).filter(Tasks.subject == subject).distinct().all()
+    difficulties = [d[0] for d in difficulties if d[0]]
+    themes = db_sess.query(Tasks.theme).filter(Tasks.subject == subject).distinct().all()
+    themes = [t[0] for t in themes if t[0]]
+    selected_difficulties = request.args.getlist('difficulty')
+    selected_themes = request.args.getlist('theme')
 
-    return render_template('tasks.html', tasks=tasks, subject=subject)
+    query = db_sess.query(Tasks).filter(Tasks.subject == subject)
+    if selected_difficulties:
+        query = query.filter(Tasks.difficulty.in_(selected_difficulties))
+    if selected_themes:
+        query = query.filter(Tasks.theme.in_(selected_themes))
+    if sort_by == 'difficulty':
+        tasks = query.order_by(Tasks.difficulty).all()
+    elif sort_by == 'theme':
+        tasks = query.all()
+    else:
+        tasks = query.all()
+    return render_template('tasks.html', tasks=tasks, subject=subject,
+                           difficulties=difficulties, themes=themes, selected_difficulties=selected_difficulties,
+                           selected_themes=selected_themes, sort_by=sort_by)
 
 
 @app.route("/<subject>", methods=['GET', 'POST'])
+@user_ban
 def subject(subject):
     session['subject'] = "subject"
     path = request.path.split('/')
     if path[1] != 'subject':
         session['subject'] = path[1]
         return redirect(f"/{subject}/")
-    return render_template('subject.html', subject=subject)
+    return render_template('subject.html',  subject=subject)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -139,6 +155,7 @@ def logout():
 @app.route('/profile')
 @app.route('/profile/<int:user_id>')
 @login_required
+@user_ban
 def profile(user_id=None):
     subject = session.get('subject')
     db_sess = db_session.create_session()
@@ -197,32 +214,21 @@ def profile(user_id=None):
 def admin():
     subject = session.get('subject')
     db_sess = db_session.create_session()
-    users = db_sess.query(User).all()
-
+    users = db_sess.query(User)
     if request.method == "POST":
-        changes_made = False
-
         for user in users:
             admin_value = request.form.get(f"admin_{user.id}")
             ban_value = request.form.get(f"ban_{user.id}")
-
-            new_admin = admin_value == "admin"
-            new_ban = ban_value == "banned"
-
-            if user.admin != new_admin or user.ban != new_ban:
-                print(f"Обновление пользователя {user.id} ({user.name}): "
-                      f"admin={user.admin}->{new_admin}, ban={user.ban}->{new_ban}")
-
-                user.admin = new_admin
-                user.ban = new_ban
-                changes_made = True
-
-        if changes_made:
-            db_sess.commit()
-            print(f"Изменения сохранены в БД")
-
+            if admin_value == "admin":
+                user.admin = 1
+            if admin_value == "user":
+                user.admin = 0
+            if ban_value == "banned":
+                user.ban = 1
+            if ban_value == "unbanned":
+                user.ban = 0
+        db_sess.commit()
         return redirect('/admin')
-
     return render_template("admin_first.html", users=users, subject=subject)
 
 
@@ -230,9 +236,57 @@ def admin():
 @login_required
 @admin_required
 @user_ban
-def admin_task():
-    subject = session.get('subject')
-    return render_template("admin_task.html", subject=subject)
+def subject_admin():
+    subject = session['subject']
+    return render_template("subject_admin.html", subject=subject)
+
+
+@app.route('/admin/task/<subject_admin>', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin_task(subject_admin):
+    subject = session['subject']
+    if subject_admin == 'информатика':
+        if request.method == "POST":
+            db_sess = db_session.create_session()
+            subject_name = request.form.get("subject")
+            task_name = request.form.get("task_name")
+            memory_limit = request.form.get("memory_limit")
+            time_limit = request.form.get("time_limit")
+            task_description = request.form.get("task_description")
+            input_data = request.form.get("input_data")
+            output_data = request.form.get("output_data")
+            level = request.form.get("level")
+            theme = request.form.get("theme")
+            test_list = []
+            test_list.append((request.form.get("test1_input"), request.form.get("test1_output")))
+            test_list.append((request.form.get("test2_input"), request.form.get("test2_output")))
+            test_list.append((request.form.get("test3_input"), request.form.get("test3_output")))
+            test_list.append((request.form.get("test4_input"), request.form.get("test4_output")))
+            test_list.append((request.form.get("test5_input"), request.form.get("test5_output")))
+            task = Tasks(
+                subject=subject_name,
+                title=task_name,
+                statement=task_description,
+                input_format=input_data,
+                output_format=output_data,
+                memory_limit=memory_limit,
+                time_limit=time_limit,
+                difficulty=level,
+                theme=theme
+            )
+            task_id = db_sess.query(Tasks).all()[-1].id + 1
+            for i in range(5):
+                task_test = TaskTest(
+                    task_id=task_id,
+                    input_data=test_list[i][0],
+                    output=test_list[i][1],
+                )
+                db_sess.add(task_test)
+            db_sess.add(task)
+            db_sess.commit()
+    return render_template("admin_task.html", subject_admin=subject_admin, subject=subject)
 
 
 @app.route('/<subject>/pvp/create')
@@ -358,8 +412,7 @@ def training(subject, task_id):
         else:
             verdict = "Нет сданных решений"
             test_passed = None
-        return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed,
-                               subject=subject)
+        return render_template('training.html', task=task, test=task_test[0], verdict=verdict, test_passed=test_passed, subject=subject)
     else:
         if request.method == "POST":
             answer = request.form.get("answer")
@@ -378,7 +431,7 @@ def training(subject, task_id):
             db_sess.add(submission_result)
             db_sess.commit()
         last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
-                                                            Submissions.task_id == task_id).all()
+                                                    Submissions.task_id == task_id).all()
         if last_submission:
             result = last_submission[-1]
             verdict = result.verdict
@@ -486,7 +539,7 @@ def pvp_room(subject, room):
             verdict = "Нет сданных решений"
             test_passed = None
         return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info,
-                               verdict=verdict, test_passed=test_passed, subject=subject)
+                            verdict=verdict, test_passed=test_passed, subject=subject)
     else:
         if request.method == "POST":
             answer = request.form.get("answer")
@@ -503,7 +556,7 @@ def pvp_room(subject, room):
                     verdict="Неверный ответ, попробуйте снова",
                 )
         last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
-                                                            Submissions.task_id == task_id).all()
+                                                    Submissions.task_id == task_id).all()
         if last_submission:
             result = last_submission[-1]
             verdict = result.verdict
