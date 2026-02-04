@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Выбор предмета{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='subject.css') }}">{% endblock %}
+{% block content %}
+<h1>Выберите предмет для которого хотите добавить задачу</h1>
+<a href="/admin/task/информатика">Информатика</a>
+<a href="/admin/task/математика">Математика</a>
+<a href="/admin/task/русский язык">Русский язык</a>
+<a href="/admin/task/химия">Химия</a>
+<a href="/admin/task/английский язык">Английский язык</a>
+<a href="/admin/task/биология">Биология</a>
+{% endblock %}
