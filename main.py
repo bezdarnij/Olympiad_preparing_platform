@@ -65,12 +65,6 @@ def favicon():
 @app.route("/")
 @app.route("/<subject>/")
 def index(subject=None):
-    if subject:
-        session['subject'] = subject
-    subject_1 = session.get('subject')
-
-    if not subject_1:
-        return redirect('/subject')
 
     if request.path == '/' or 'subject' in request.path:
         return redirect('/subject')
@@ -78,7 +72,22 @@ def index(subject=None):
     db_sess = db_session.create_session()
     sort_by = request.args.get('sort_by')
 
-    query = db_sess.query(Tasks).filter(Tasks.subject == subject_1)
+    difficulties = db_sess.query(Tasks.difficulty).filter(Tasks.subject == subject).distinct().all()
+    difficulties = [d[0] for d in difficulties if d[0]]
+
+    themes = db_sess.query(Tasks.theme).filter(Tasks.subject == subject).distinct().all()
+    themes = [t[0] for t in themes if t[0]]
+
+    selected_difficulties = request.args.getlist('difficulty')
+    selected_themes = request.args.getlist('theme')
+
+    query = db_sess.query(Tasks).filter(Tasks.subject == subject)
+
+    if selected_difficulties:
+        query = query.filter(Tasks.difficulty.in_(selected_difficulties))
+
+    if selected_themes:
+        query = query.filter(Tasks.theme.in_(selected_themes))
 
     if sort_by == 'difficulty':
         tasks = query.order_by(Tasks.difficulty).all()
@@ -87,7 +96,9 @@ def index(subject=None):
     else:
         tasks = query.all()
 
-    return render_template('tasks.html', tasks=tasks, subject=subject_1)
+    return render_template('tasks.html', tasks=tasks, subject=subject,
+        difficulties=difficulties, themes=themes, selected_difficulties=selected_difficulties,
+        selected_themes=selected_themes, sort_by=sort_by)
 
 
 @app.route("/<subject>", methods=['GET', 'POST'])

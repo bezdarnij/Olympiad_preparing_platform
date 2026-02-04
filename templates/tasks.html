@@ -5,15 +5,24 @@
 {% endblock %}
 
 {% block content %}
-<h1>Каталог задач</h1>
 <form method="get">
-    <select name="sort_by">
-        <option value="difficulty">Сложности</option>
-    </select>
-    <select name="sort_by">
-        <option value="difficulty">Теме</option>
-    </select>
-    <button type="submit" class="btn btn-secondary">Сортировать</button>
+    <h3>Сложности:</h3>
+    {% for difficulty in difficulties %}
+    <input type="checkbox" name="difficulty" value="{{ difficulty }}"
+           id="diff_{{ loop.index }}" {% if difficulty in selected_difficulties %}checked{% endif %}>
+    <label for="diff_{{ loop.index }}">{{ difficulty }}</label><br>
+    {% endfor %}
+
+    <h3>Теме:</h3>
+    {% for theme in themes %}
+    <input type="checkbox" name="theme" value="{{ theme }}"
+           id="theme_{{ loop.index }}" {% if theme in selected_themes %}checked{% endif %}>
+    <label for="theme_{{ loop.index }}">{{ theme }}</label><br>
+    {% endfor %}
+
+    <br><br>
+    <input type="submit" value="Применить фильтры">
+    <a href="/{{ subject }}/">Сбросить фильтры</a>
 </form>
 {% if tasks %}
     {% for task in tasks %}
@@ -23,7 +32,7 @@
             {{ task.title }}
           </a>
         </li>
-        <p>Предмет: {{ task.subject or 'Не указан' }}</p>
+        <p>Тема: {{ task.theme or 'Не указана' }}</p>
         <p>Сложность: {{ task.difficulty or 'Не указана' }}</p>
     </div>
     {% endfor %}
