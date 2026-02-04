@@ -64,7 +64,6 @@ def favicon():
 
 @app.route("/")
 @app.route("/<subject>/")
-@user_ban
 def index(subject=None):
     if request.path == '/' or 'subject' in request.path:
         return redirect('/subject')
@@ -96,7 +95,6 @@ def index(subject=None):
 
 
 @app.route("/<subject>", methods=['GET', 'POST'])
-@user_ban
 def subject(subject):
     session['subject'] = "subject"
     path = request.path.split('/')
