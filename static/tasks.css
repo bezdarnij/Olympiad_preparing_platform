@@ -167,6 +167,7 @@ select:focus {
     font-size: 18px;
 }
 
+
 .col-md-6 p:last-of-type::before {
     content: '⭐';
     font-size: 18px;
@@ -290,4 +291,9 @@ form {
 
 .col-md-6 p:contains("Сложная") {
     color: #dc2626;
+}
+
+.solved_task {
+    display: flex;
+    justify-content: space-between;
 }
