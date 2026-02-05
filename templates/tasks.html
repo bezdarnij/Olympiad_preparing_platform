@@ -14,11 +14,14 @@
     {% endfor %}
 
     <h3>Теме:</h3>
+    <select name="theme" multiple size="1">
     {% for theme in themes %}
-    <input type="checkbox" name="theme" value="{{ theme }}"
-           id="theme_{{ loop.index }}" {% if theme in selected_themes %}checked{% endif %}>
-    <label for="theme_{{ loop.index }}">{{ theme }}</label><br>
+    <option value="{{ theme }}"
+            {% if theme in selected_themes %}selected{% endif %}>
+        {{ theme }}
+    </option>
     {% endfor %}
+    </select>
 
     <br><br>
     <input type="submit" value="Применить фильтры">
