@@ -173,33 +173,31 @@ def profile(user_id=None):
     tasks_stats = {}
     for submission in all_submissions:
         task_id = submission.task_id
+        task_task = db_sess.get(Tasks, task_id)
         if task_id not in tasks_stats:
             tasks_stats[task_id] = {
                 'task': submission.tasks,
                 'best_submission': submission,
                 'attempts': 1,
-                'solved': submission.verdict == "OK"
+                'solved': submission.verdict == "OK",
+                'subject': task_task.subject
             }
         else:
             tasks_stats[task_id]['attempts'] += 1
-            if submission.total_tests > tasks_stats[task_id]['best_submission'].total_tests:
-                tasks_stats[task_id]['best_submission'] = submission
+            if task_task.subject == 'информатика':
+                if submission.total_tests > tasks_stats[task_id]['best_submission'].total_tests:
+                    tasks_stats[task_id]['best_submission'] = submission
             if submission.verdict == "OK":
                 tasks_stats[task_id]['solved'] = True
-
-    sorted_tasks = sorted(
-        tasks_stats.values(),
-        key=lambda x: (not x['solved'], -x['best_submission'].total_tests)
-    )
-
+    tasks_stats = tasks_stats.values()
     total_tasks_attempted = len(tasks_stats)
-    solved_tasks = sum(1 for t in tasks_stats.values() if t['solved'])
+    solved_tasks = sum(1 for t in tasks_stats if t['solved'])
     total_submissions = len(all_submissions)
 
     return render_template(
         'profile.html',
         user=user,
-        tasks_stats=sorted_tasks,
+        tasks_stats=tasks_stats,
         total_tasks_attempted=total_tasks_attempted,
         solved_tasks=solved_tasks,
         total_submissions=total_submissions,

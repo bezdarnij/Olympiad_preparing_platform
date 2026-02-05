@@ -31,14 +31,6 @@ form br {
     display: none;
 }
 
-/* ===== Form Label Text ===== */
-form::before {
-    content: 'Сортировать по';
-    font-size: 15px;
-    font-weight: 700;
-    color: #5b21b6;
-    margin-right: 8px;
-}
 
 form > text {
     display: none;

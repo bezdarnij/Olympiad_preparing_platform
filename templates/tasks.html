@@ -6,14 +6,14 @@
 
 {% block content %}
 <form method="get">
-    <h3>Сложности:</h3>
+    <h3>Сложность:</h3>
     {% for difficulty in difficulties %}
     <input type="checkbox" name="difficulty" value="{{ difficulty }}"
            id="diff_{{ loop.index }}" {% if difficulty in selected_difficulties %}checked{% endif %}>
     <label for="diff_{{ loop.index }}">{{ difficulty }}</label><br>
     {% endfor %}
 
-    <h3>Теме:</h3>
+    <h3>Тема:</h3>
     <select name="theme" multiple size="1">
     {% for theme in themes %}
     <option value="{{ theme }}"
@@ -36,15 +36,17 @@
           </a>
         </li>
         <p>Тема: {{ task.theme or 'Не указана' }}</p>
-        <div class="solved_task">
         <p>Сложность: {{ task.difficulty or 'Не указана' }}</p>
-        {% if submissions.filter(Submissions.task_id == task.id).filter(Submissions.verdict == 'OK').all() != [] %}
-        <p>Решено верно</p>
-        {% elif submissions.filter(Submissions.task_id == task.id).all() != [] %}
-        <p>Решено неверно</p>
-        {% else %}
-        <p>Не решённая</p>
-        {% endif %}
+        <div class="task-meta">
+            <span class="status-badge badge-success">
+                {% if submissions.filter(Submissions.task_id == task.id).filter(Submissions.verdict == 'OK').all() != [] %}
+                Решено верно
+                {% elif submissions.filter(Submissions.task_id == task.id).all() != [] %}
+                Решено неверно
+                {% else %}
+                Нерешённая
+                {% endif %}
+            </span>
         </div>
     </div>
     {% endfor %}
