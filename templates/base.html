@@ -14,8 +14,8 @@
 <header class="site-header">
     <nav class="navbar">
         <div class="nav-left">
-            {% if session.get('subject') %}
-            <a class="logo" href="/{{ subject }}/">На главную</a>
+            {% if session.get('subject') and session.get('subject') != 'subject' %}
+            <a class="logo" href="/{{ session.get('subject') }}/">На главную</a>
             {% else %}
             <a class="logo" href="/">На главную</a>
             {% endif %}

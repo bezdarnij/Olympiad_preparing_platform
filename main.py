@@ -63,8 +63,20 @@ def favicon():
 
 
 @app.route("/")
+@app.route("/<subject>/choice", methods=['GET', 'POST'])
+def subject(subject='subject'):
+    session['subject'] = 'subject'
+    if subject != 'subject':
+        session['subject'] = subject
+        return redirect(f"/{subject}/")
+    return render_template('subject.html',  subject=subject)
+
+
 @app.route("/<subject>/")
+@login_required
+@user_ban
 def index(subject=None):
+    session['subject'] = subject
     if request.path == '/' or 'subject' in request.path:
         return redirect('/subject/choice')
     db_sess = db_session.create_session()
@@ -92,16 +104,6 @@ def index(subject=None):
     return render_template('tasks.html', tasks=tasks, subject=subject,
                            difficulties=difficulties, themes=themes, selected_difficulties=selected_difficulties,
                            selected_themes=selected_themes, sort_by=sort_by, Submissions=Submissions, submissions=submissions)
-
-
-@app.route("/<subject>/choice", methods=['GET', 'POST'])
-def subject(subject):
-    session['subject'] = "subject"
-    path = request.path.split('/')
-    if path[1] != 'subject':
-        session['subject'] = path[1]
-        return redirect(f"/{subject}/")
-    return render_template('subject.html',  subject=subject)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -211,7 +213,8 @@ def profile(user_id=None):
 @admin_required
 @user_ban
 def admin():
-    subject = session['subject']
+    subject = session.get('subject')
+    print(subject)
     db_sess = db_session.create_session()
     users = db_sess.query(User)
     if request.method == "POST":
