@@ -88,9 +88,10 @@ def index(subject=None):
         tasks = query.all()
     else:
         tasks = query.all()
+    submissions = db_sess.query(Submissions)
     return render_template('tasks.html', tasks=tasks, subject=subject,
                            difficulties=difficulties, themes=themes, selected_difficulties=selected_difficulties,
-                           selected_themes=selected_themes, sort_by=sort_by)
+                           selected_themes=selected_themes, sort_by=sort_by, Submissions=Submissions, submissions=submissions)
 
 
 @app.route("/<subject>/choice", methods=['GET', 'POST'])
@@ -151,6 +152,7 @@ def logout():
 
 @app.route('/profile')
 @app.route('/profile/<int:user_id>')
+@app.route('/admin/profile/<int:user_id>')
 @login_required
 @user_ban
 def profile(user_id=None):
@@ -305,6 +307,77 @@ def admin_task(subject_admin):
             db_sess.add(task)
             db_sess.commit()
     return render_template("admin_task.html", subject_admin=subject_admin, subject=subject)
+
+
+@app.route('/admin/task_edit', methods=["GET", "POST"])
+@app.route('/admin/task_edit/<int:task_id>', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin_task_edit(task_id=1):
+    subject = session['subject']
+    db_sess = db_session.create_session()
+    db_task = db_sess.query(Tasks).filter(Tasks.id == task_id).all()[0]
+    db_subject = db_task.subject
+    db_task_name = db_task.title
+    db_memory_limit = db_task.memory_limit
+    db_time_limit = db_task.time_limit
+    db_task_description = db_task.statement
+    db_input_data = db_task.input_format
+    db_output_data = db_task.output_format
+    db_level = db_task.difficulty
+    db_theme = db_task.theme
+    db_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task_id).all()
+    if db_task.subject == 'информатика':
+        if request.method == "POST":
+            task_name = request.form.get("task_name")
+            memory_limit = request.form.get("memory_limit")
+            time_limit = request.form.get("time_limit")
+            task_description = request.form.get("task_description")
+            input_data = request.form.get("input_data")
+            output_data = request.form.get("output_data")
+            level = request.form.get("level")
+            theme = request.form.get("theme")
+            test_list = []
+            test_list.append((request.form.get("test1_input"), request.form.get("test1_output")))
+            test_list.append((request.form.get("test2_input"), request.form.get("test2_output")))
+            test_list.append((request.form.get("test3_input"), request.form.get("test3_output")))
+            test_list.append((request.form.get("test4_input"), request.form.get("test4_output")))
+            test_list.append((request.form.get("test5_input"), request.form.get("test5_output")))
+            db_task.subject = db_subject
+            db_task.title = task_name
+            db_task.statement = task_description
+            db_task.input_format = input_data
+            db_task.output_format = output_data
+            db_task.memory_limit = memory_limit
+            db_task.time_limit = time_limit
+            db_task.difficulty = level
+            db_task.theme = theme
+            for i in range(5):
+                db_test[i].task_id = task_id
+                db_test[i].input_data = test_list[i][0]
+                db_test[i].output = test_list[i][1]
+                db_sess.commit()
+    else:
+        if request.method == "POST":
+            db_sess = db_session.create_session()
+            task_name = request.form.get("task_name")
+            task_description = request.form.get("task_description")
+            level = request.form.get("level")
+            theme = request.form.get("theme")
+            subject = db_subject
+            db_task.title = task_name
+            db_task.statement = task_description
+            db_task.difficulty = level
+            db_task.theme = theme
+            db_test[0].task_id = task_id
+            db_test[0].input_data = request.form.get("test_input")
+            db_sess.commit()
+    return render_template("task_edit.html", subject=subject, db_task_name=db_task_name,
+                           db_memory_limit=db_memory_limit, db_time_limit=db_time_limit,
+                           db_task_description=db_task_description, db_input_data=db_input_data,
+                           db_output_data=db_output_data, db_level=db_level, db_theme=db_theme,
+                           db_subject=db_subject, db_test=db_test)
 
 
 @app.route('/<subject>/pvp/create')
