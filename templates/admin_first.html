@@ -7,6 +7,8 @@
 
 {% block content %}
 <a class="btn btn-task" href="/admin/task">Добавить задачу</a>
+<a class="btn btn-task" href="/admin/task_edit">Изменить задачу</a>
+<a class="btn btn-task" href="/admin/task_list">Список задач</a>
 
 <form method="post" action="/admin">
 <div class="table-container">
@@ -20,7 +22,7 @@
         </tr>
         {% for user in users %}
         <tr>
-            <td>{{user.id}}</td>
+            <td><a href="/admin/profile/{{user.id}}">{{user.id}}</a></td>
             <td>{{ user.name }}</td>
             <td>{{user.email}}</td>
             <td>
