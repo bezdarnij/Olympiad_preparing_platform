@@ -155,6 +155,7 @@ def login():
 def logout():
     logout_user()
     return redirect("/")
+    #hhwdho
 
 
 @app.route('/profile')
