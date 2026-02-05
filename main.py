@@ -309,6 +309,30 @@ def admin_task(subject_admin):
     return render_template("admin_task.html", subject_admin=subject_admin, subject=subject)
 
 
+@app.route('/admin/task_list', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin_task_list():
+    subject = session['subject']
+    db_sess = db_session.create_session()
+    tasks = db_sess.query(Tasks).all()
+    return render_template("task_list.html", subject=subject, tasks=tasks)
+
+
+@app.route('/admin/task_delete', methods=["GET", "POST"])
+@app.route('/admin/task_delete/<int:task_id>', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin_task_delete(task_id=1):
+    db_sess = db_session.create_session()
+    task = db_sess.get(Tasks, task_id)
+    db_sess.delete(task)
+    db_sess.commit()
+    return redirect('/admin')
+
+
 @app.route('/admin/task_edit', methods=["GET", "POST"])
 @app.route('/admin/task_edit/<int:task_id>', methods=["GET", "POST"])
 @login_required
@@ -358,6 +382,7 @@ def admin_task_edit(task_id=1):
                 db_test[i].input_data = test_list[i][0]
                 db_test[i].output = test_list[i][1]
                 db_sess.commit()
+            return redirect('/admin')
     else:
         if request.method == "POST":
             db_sess = db_session.create_session()
@@ -373,6 +398,7 @@ def admin_task_edit(task_id=1):
             db_test[0].task_id = task_id
             db_test[0].input_data = request.form.get("test_input")
             db_sess.commit()
+            return redirect('/admin')
     return render_template("task_edit.html", subject=subject, db_task_name=db_task_name,
                            db_memory_limit=db_memory_limit, db_time_limit=db_time_limit,
                            db_task_description=db_task_description, db_input_data=db_input_data,
