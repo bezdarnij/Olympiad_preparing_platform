@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<a class="btn btn-task" href="/admin/task">Добавить задачу</a>
+<a class="btn btn-task" href="/admin/task_list">Список задач</a>
 
 <form method="post" action="/admin">
 <div class="table-container">
@@ -45,6 +45,7 @@
                     {% endif %}
                 </select>
             </td>
+            <td><a href="/admin/profile/{{user.id}}">Посмотреть статистику</a></td>
         </tr>
         {% endfor %}
     </table>

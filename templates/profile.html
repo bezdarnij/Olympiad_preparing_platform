@@ -42,8 +42,6 @@
     </div>
 
     <div class="profile-content">
-        <h2>Решенные задачи</h2>
-
         {% if tasks_stats %}
         <div class="tasks-list">
             {% for task_stat in tasks_stats %}
@@ -58,13 +56,14 @@
                             {% endif %}
                         </span>
                         <h3>
-                            <a href="/task/{{ task_stat.task.id }}">{{ task_stat.task.title }}</a>
+                            <a href="/{{ subject }}/task/{{ task_stat.task.id }}">{{ task_stat.task.title }}</a>
                         </h3>
                     </div>
                     <div class="task-meta">
                         <span class="difficulty difficulty-{{ task_stat.task.difficulty|lower }}">
                             {{ task_stat.task.difficulty }}
                         </span>
+                        <span class="task-subject">{{ task_stat.subject|capitalize }}</span>
                     </div>
                 </div>
 
@@ -73,10 +72,12 @@
                         <span class="stat-icon">📝</span>
                         <span>Попыток: {{ task_stat.attempts }}</span>
                     </div>
+                    {% if task_stat.best_submission.total_tests != None %}
                     <div class="stat-item">
                         <span class="stat-icon">✓</span>
                         <span>Тестов: {{ task_stat.best_submission.total_tests }}/5</span>
                     </div>
+                    {% endif %}
                     <div class="stat-item">
                         <span class="stat-icon">🏆</span>
                         <span>Вердикт: {{ task_stat.best_submission.verdict }}</span>
@@ -93,12 +94,10 @@
         <div class="no-tasks">
             <p>{% if is_own_profile %}Вы еще не решали задачи{% else %}Пользователь еще не решал задачи{% endif %}</p>
             {% if is_own_profile %}
-            <a href="/tasks" class="btn btn-primary">Перейти к задачам</a>
+            <a href="/{{ subject }}" class="btn btn-primary">Перейти к задачам</a>
             {% endif %}
         </div>
         {% endif %}
     </div>
 </div>
 {% endblock %}
-
-
