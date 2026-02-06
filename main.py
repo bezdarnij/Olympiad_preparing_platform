@@ -1,4 +1,7 @@
-from flask import Flask, render_template, redirect, request, abort, session
+import csv
+import io
+
+from flask import Flask, render_template, redirect, request, abort, session, Response
 from data import db_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.users import User
@@ -7,6 +10,7 @@ from data.submissions import Submissions
 from data.task_tests import TaskTest
 from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
+from openai import OpenAI
 import uuid
 import os
 import subprocess
@@ -15,6 +19,8 @@ from functools import wraps
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
+
+client = OpenAI(api_key='sk-d418d27a029b454cafbcf9692a69eb0a')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -318,7 +324,182 @@ def admin_task_list():
     subject = session['subject']
     db_sess = db_session.create_session()
     tasks = db_sess.query(Tasks).all()
+    if request.method == "POST":
+        file = request.files.get("file")
+        if not file or file.filename == "":
+            abort(400, "Файл не выбран")
+        file.filename = "task.csv"
+        os.makedirs(f"task", exist_ok=True)
+        file.save(os.path.join(f"task", file.filename))
+        with open('task/task.csv', 'r', encoding='utf-8') as f:
+            reader = csv.reader(f, delimiter=',')
+            h = next(reader)
+            for row in reader:
+                task = Tasks(
+                    subject=row[0],
+                    theme=row[1],
+                    difficulty=row[2],
+                    title=row[3],
+                    statement=row[4],
+                    input_format=row[5],
+                    output_format=row[6],
+                    time_limit=row[7],
+                    memory_limit=row[8]
+                )
+                db_sess.add(task)
+                db_sess.commit()
+        return redirect('/admin/task_list')
+
     return render_template("task_list.html", subject=subject, tasks=tasks)
+
+
+@app.route('/admin/task_ai/<subject_admin>', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def ai(subject_admin):
+    subject = session['subject']
+    ai_subject = subject_admin
+    ai_difficulty = 'средняя'
+    if subject_admin == 'информатика':
+        prompt = (f"Напиши условие для олимпиадной задачи по предмету: {subject_admin}, сложность задачи: {ai_difficulty}"
+                 f"ответ верни строго в формате JSON:"
+                 f"'тема':"
+                 f"'название задачи':"
+                 f"'условие задачи':"
+                 f"'лимит памяти':"
+                 f"'лимит времени':"
+                 f"'входные данные':"
+                 f"'выходные данные':"
+                 f"'входные данные тест 1':"
+                 f"'выходные данные тест 1':"
+                 f"'входные данные тест 2':"
+                 f"'выходные данные тест 2':"
+                 f"'входные данные тест 3':"
+                 f"'выходные данные тест 3':"
+                 f"'входные данные тест 4':"
+                 f"'выходные данные тест 4':"
+                 f"'входные данные тест 5':"
+                 f"'выходные данные тест 5':")
+    else:
+        prompt = (
+            f"Напиши условие для олимпиадной задачи по предмету: {subject_admin}, сложность задачи: {ai_difficulty}"
+            f"ответ верни строго в формате JSON:"
+            f"'тема':"
+            f"'название задачи':"
+            f"'условие задачи':"
+            f"'ответ':")
+    response = client.chat.completions.create(model="gpt-5-mini", messages=[{'role': 'user', 'content': prompt}])
+    ai_task = response.choise[0].message.content
+    print(ai_task)
+    ai_task_name = ""
+    ai_memory_limit = ""
+    ai_time_limit = ""
+    ai_task_description = ""
+    ai_input_data = ""
+    ai_output_data = ""
+    ai_level = ""
+    ai_theme = ""
+    ai_test = ""
+    if subject_admin == 'информатика':
+        if request.method == "POST":
+            db_sess = db_session.create_session()
+            task_name = request.form.get("task_name")
+            memory_limit = request.form.get("memory_limit")
+            time_limit = request.form.get("time_limit")
+            task_description = request.form.get("task_description")
+            input_data = request.form.get("input_data")
+            output_data = request.form.get("output_data")
+            level = request.form.get("level")
+            theme = request.form.get("theme")
+            test_list = []
+            test_list.append((request.form.get("test1_input"), request.form.get("test1_output")))
+            test_list.append((request.form.get("test2_input"), request.form.get("test2_output")))
+            test_list.append((request.form.get("test3_input"), request.form.get("test3_output")))
+            test_list.append((request.form.get("test4_input"), request.form.get("test4_output")))
+            test_list.append((request.form.get("test5_input"), request.form.get("test5_output")))
+            task = Tasks(
+                subject=subject_admin,
+                title=task_name,
+                statement=task_description,
+                input_format=input_data,
+                output_format=output_data,
+                memory_limit=memory_limit,
+                time_limit=time_limit,
+                difficulty=level,
+                theme=theme
+            )
+            task_id = db_sess.query(Tasks).all()[-1].id + 1
+            for i in range(5):
+                task_test = TaskTest(
+                    task_id=task_id,
+                    input_data=test_list[i][0],
+                    output=test_list[i][1],
+                )
+                db_sess.add(task_test)
+            db_sess.add(task)
+            db_sess.commit()
+    else:
+        if request.method == "POST":
+            db_sess = db_session.create_session()
+            task_name = request.form.get("task_name")
+            task_description = request.form.get("task_description")
+            level = request.form.get("level")
+            theme = request.form.get("theme")
+            task = Tasks(
+                subject=subject_admin,
+                title=task_name,
+                statement=task_description,
+                difficulty=level,
+                theme=theme
+            )
+            task_id = db_sess.query(Tasks).all()[-1].id + 1
+            task_test = TaskTest(
+                task_id=task_id,
+                input_data=request.form.get("test_input"),
+            )
+            db_sess.add(task_test)
+            db_sess.add(task)
+            db_sess.commit()
+            return redirect('/admin')
+    return render_template("admin_task_ai.html", subject=subject, ai_task_name=ai_task_name,
+                           ai_memory_limit=ai_memory_limit, ai_time_limit=ai_time_limit,
+                           ai_task_description=ai_task_description, db_input_data=ai_input_data,
+                           ai_output_data=ai_output_data, ai_level=ai_level, db_theme=ai_theme,
+                           ai_subject=ai_subject, ai_test=ai_test)
+
+
+
+@app.route('/export', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def export():
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    writer.writerow(['ID', 'SUBJECT', 'THEME', 'DIFFICULTY', 'TITLE', 'STATEMENT', 'INPUT_FORMAT', 'TIME_LIMIT', 'MEMORY_LIMIT'])
+
+    db_sess = db_session.create_session()
+    tasks = db_sess.query(Tasks).all()
+
+    for task in tasks:
+        writer.writerow([
+            task.id,
+            task.subject,
+            task.theme,
+            task.difficulty,
+            task.title,
+            task.statement,
+            task.input_format,
+            task.output_format,
+            task.time_limit,
+            task.memory_limit
+        ])
+
+    output.seek(0)
+
+    return Response(output, mimetype='text/csv', headers={'Content-Disposition': 'attachment;filename=task.csv'})
 
 
 @app.route('/admin/task_delete', methods=["GET", "POST"])
