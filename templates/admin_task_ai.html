@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">{% endblock %}
+{% block content %}
+        <div class="container">
+            <h1>Создать задачу с ии</h1>
+            <form method="post" class="task-form">
+                <div class="form-group">
+                    <label>Предмет: {{ ai_subject }}</label>
+                </div>
+                <div class="form-group">
+                    <label>Тема</label>
+                    <input type="text" name="theme" value="{{ ai_theme }}"/>
+                </div>
+                <div class="form-group">
+                    <label>Название задачи</label>
+                    <input type="text" name="task_name" value="{{ ai_task_name }}"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Условие задачи</label>
+                    <textarea name="task_description" rows="5" >{{ ai_task_description }}</textarea>
+                </div>
+                {% if db_subject == 'информатика' %}
+                <div class="form-group">
+                    <label>Лимит памяти</label>
+                    <input type="text" name="memory_limit"  value="{{ ai_memory_limit }}"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Лимит времени</label>
+                    <input type="text" name="time_limit" value="{{ ai_time_limit }}"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Входные данные</label>
+                    <textarea name="input_data" rows="2">{{ ai_input_data }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Выходные данные</label>
+                    <textarea name="output_data" rows="2">{{ ai_output_data }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Тест 1</label>
+                    <div class="test-pair">
+                        <textarea name="test1_input" rows="2" placeholder="Входные данные">{{ ai_test[0].input_data }}</textarea>
+                        <textarea name="test1_output" rows="2" placeholder="Выходные данные">{{ ai_test[0].output }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Тест 2</label>
+                    <div class="test-pair">
+                        <textarea name="test2_input" rows="2" placeholder="Входные данные">{{ ai_test[1].input_data }}</textarea>
+                        <textarea name="test2_output" rows="2" placeholder="Выходные данные">{{ ai_test[1].output }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Тест 3</label>
+                    <div class="test-pair">
+                        <textarea name="test3_input" rows="2" placeholder="Входные данные">{{ ai_test[2].input_data }}</textarea>
+                        <textarea name="test3_output" rows="2" placeholder="Выходные данные">{{ ai_test[2].output }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Тест 4</label>
+                    <div class="test-pair">
+                        <textarea name="test4_input" rows="2" placeholder="Входные данные">{{ ai_test[3].input_data }}</textarea>
+                        <textarea name="test4_output" rows="2" placeholder="Выходные данные">{{ ai_test[3].output }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Тест 5</label>
+                    <div class="test-pair">
+                        <textarea name="test5_input" rows="2" placeholder="Входные данные">{{ ai_test[4].input_data }}</textarea>
+                        <textarea name="test5_output" rows="2" placeholder="Выходные данные">{{ i_test[4].output }}</textarea>
+                    </div>
+                </div>
+                {% else %}
+                <div class="form-group">
+                    <label>Ответ</label>
+                    <div class="test-pair">
+                        <textarea name="test_input" rows="2" placeholder="Ответ">{{ ai_test[0].input_data }}</textarea>
+                    </div>
+                </div>
+                {% endif %}
+                <fieldset>
+                    <legend>Выберите сложность</legend>
+                    <label>
+                    <input type="radio" name="level" value="легкая">
+                    легкая
+                    </label>
+                    <label>
+                    <input type="radio" name="level" value="средняя" checked>
+                    средняя
+                    </label>
+                    <label>
+                    <input type="radio" name="level" value="сложная">
+                    сложная
+                    </label>
+                </fieldset>
+                <div class="form-actions">
+                    <button type="submit">Отправить</button>
+                </div>
+            </form>
+        </div>
+{% endblock %}
