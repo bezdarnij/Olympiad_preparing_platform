@@ -9,6 +9,16 @@
 
 <a class="btn btn-task" href="/admin/task">Добавить задачу</a>
 
+<a class="btn btn-export" href="/export">Экспорт задач</a>
+
+<div class="task-import">
+    <p>Импорт задач</p>
+    <form class="send" method="post" enctype="multipart/form-data" id="uploadForm">
+        <input type="file" accept=".csv" name="file" id="csvFile" required />
+        <button type="submit" id="submitBtn">Отправить</button>
+    </form>
+</div>
+
 <div class="table-container">
     <table>
         <tr>

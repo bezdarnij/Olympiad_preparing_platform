@@ -20,7 +20,7 @@ from functools import wraps
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
 
-client = OpenAI(api_key='sk-d418d27a029b454cafbcf9692a69eb0a')
+client = OpenAI(api_key='')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -218,7 +218,6 @@ def profile(user_id=None):
 @user_ban
 def admin():
     subject = session.get('subject')
-    print(subject)
     db_sess = db_session.create_session()
     users = db_sess.query(User)
     if request.method == "POST":
