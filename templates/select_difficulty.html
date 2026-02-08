@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Выбор предмета{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='subject.css') }}">{% endblock %}
+{% block content %}
+<h1>Выберите сложность</h1>
+<a href="/admin/task_ai/{{ subject_admin }}/легкая">легкая</a>
+<a href="/admin/task_ai/{{ subject_admin }}/средняя">средняя</a>
+<a href="/admin/task_ai/{{ subject_admin }}/сложная">сложная</a>
+{% endblock %}

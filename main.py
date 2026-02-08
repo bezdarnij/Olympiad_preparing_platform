@@ -10,7 +10,8 @@ from data.submissions import Submissions
 from data.task_tests import TaskTest
 from forms.user import RegisterForm, LoginForm
 from flask_socketio import SocketIO, join_room, leave_room, emit
-from openai import OpenAI
+from elo import update_elo
+from ai import generate_task
 import uuid
 import os
 import subprocess
@@ -20,13 +21,13 @@ from functools import wraps
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
 
-client = OpenAI(api_key='')
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 socketio = SocketIO(app, cors_allowed_origins="*")
 matches = {}
+
+subjects = ['информатика', 'математика', 'физика', 'химия', 'биология', 'литература', 'история', 'география', 'английский язык', 'русский язык']
 
 
 @app.errorhandler(403)
@@ -82,6 +83,8 @@ def subject(subject='subject'):
 @login_required
 @user_ban
 def index(subject=None):
+    if subject not in subjects:
+        abort(404)
     session['subject'] = subject
     if request.path == '/' or 'subject' in request.path:
         return redirect('/subject/choice')
@@ -356,50 +359,36 @@ def admin_task_list():
 @login_required
 @admin_required
 @user_ban
-def ai(subject_admin):
+def select_difficulty(subject_admin):
+    subject = session['subject']
+    return render_template("select_difficulty.html", subject_admin=subject_admin, subject=subject)
+
+
+@app.route('/admin/task_ai/<subject_admin>/<difficulty>', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def ai(subject_admin, difficulty):
+    if subject_admin not in subjects:
+        abort(404)
     subject = session['subject']
     ai_subject = subject_admin
-    ai_difficulty = 'средняя'
+    ai_difficulty = difficulty
+    ai_task = generate_task(ai_difficulty, ai_subject)
+    ai_theme = ai_task.get("тема")
+    ai_task_name = ai_task.get("название задачи")
+    ai_task_description = ai_task.get("условие задачи")
+    ai_level = ai_difficulty
+    ai_memory_limit = ai_task.get("лимит памяти")
+    ai_time_limit = ai_task.get("лимит времени")
+    ai_input_data = ai_task.get("входные данные")
+    ai_output_data = ai_task.get("выходные данные")
+    ai_test = []
     if subject_admin == 'информатика':
-        prompt = (f"Напиши условие для олимпиадной задачи по предмету: {subject_admin}, сложность задачи: {ai_difficulty}"
-                 f"ответ верни строго в формате JSON:"
-                 f"'тема':"
-                 f"'название задачи':"
-                 f"'условие задачи':"
-                 f"'лимит памяти':"
-                 f"'лимит времени':"
-                 f"'входные данные':"
-                 f"'выходные данные':"
-                 f"'входные данные тест 1':"
-                 f"'выходные данные тест 1':"
-                 f"'входные данные тест 2':"
-                 f"'выходные данные тест 2':"
-                 f"'входные данные тест 3':"
-                 f"'выходные данные тест 3':"
-                 f"'входные данные тест 4':"
-                 f"'выходные данные тест 4':"
-                 f"'входные данные тест 5':"
-                 f"'выходные данные тест 5':")
+        for i in range(1, 6):
+            ai_test.append((ai_task.get(f"входные данные тест {i}"), ai_task.get(f"выходные данные тест {i}")))
     else:
-        prompt = (
-            f"Напиши условие для олимпиадной задачи по предмету: {subject_admin}, сложность задачи: {ai_difficulty}"
-            f"ответ верни строго в формате JSON:"
-            f"'тема':"
-            f"'название задачи':"
-            f"'условие задачи':"
-            f"'ответ':")
-    response = client.chat.completions.create(model="gpt-5-mini", messages=[{'role': 'user', 'content': prompt}])
-    ai_task = response.choise[0].message.content
-    print(ai_task)
-    ai_task_name = ""
-    ai_memory_limit = ""
-    ai_time_limit = ""
-    ai_task_description = ""
-    ai_input_data = ""
-    ai_output_data = ""
-    ai_level = ""
-    ai_theme = ""
-    ai_test = ""
+        ai_test.append((ai_task.get("ответ"), ""))
     if subject_admin == 'информатика':
         if request.method == "POST":
             db_sess = db_session.create_session()
@@ -463,9 +452,9 @@ def ai(subject_admin):
             return redirect('/admin')
     return render_template("admin_task_ai.html", subject=subject, ai_task_name=ai_task_name,
                            ai_memory_limit=ai_memory_limit, ai_time_limit=ai_time_limit,
-                           ai_task_description=ai_task_description, db_input_data=ai_input_data,
-                           ai_output_data=ai_output_data, ai_level=ai_level, db_theme=ai_theme,
-                           ai_subject=ai_subject, ai_test=ai_test)
+                           ai_task_description=ai_task_description, ai_input_data=ai_input_data,
+                           ai_output_data=ai_output_data, ai_level=ai_level, ai_theme=ai_theme,
+                           ai_subject=ai_subject, ai_test=ai_test, subject_admin=subject_admin)
 
 
 
@@ -874,7 +863,6 @@ def finish_match(room):
 
     score1 = completed.get(str(user1_id), 0)
     score2 = completed.get(str(user2_id), 0)
-    from elo import update_elo
     if score1 > score2:
         user1.elo_rating, user2.elo_rating = update_elo(user1.elo_rating, user2.elo_rating)
         result = f"{user1.name} победил"

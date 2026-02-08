@@ -9,6 +9,9 @@
                     <label>Предмет: {{ ai_subject }}</label>
                 </div>
                 <div class="form-group">
+                    <label>Сложность: {{ ai_level }}</label>
+                </div>
+                <div class="form-group">
                     <label>Тема</label>
                     <input type="text" name="theme" value="{{ ai_theme }}"/>
                 </div>
@@ -21,7 +24,7 @@
                     <label>Условие задачи</label>
                     <textarea name="task_description" rows="5" >{{ ai_task_description }}</textarea>
                 </div>
-                {% if db_subject == 'информатика' %}
+                {% if subject_admin == 'информатика' %}
                 <div class="form-group">
                     <label>Лимит памяти</label>
                     <input type="text" name="memory_limit"  value="{{ ai_memory_limit }}"/>
@@ -45,65 +48,50 @@
                 <div class="form-group">
                     <label>Тест 1</label>
                     <div class="test-pair">
-                        <textarea name="test1_input" rows="2" placeholder="Входные данные">{{ ai_test[0].input_data }}</textarea>
-                        <textarea name="test1_output" rows="2" placeholder="Выходные данные">{{ ai_test[0].output }}</textarea>
+                        <textarea name="test1_input" rows="2" placeholder="Входные данные">{{ ai_test[0][0] }}</textarea>
+                        <textarea name="test1_output" rows="2" placeholder="Выходные данные">{{ ai_test[0][1] }}</textarea>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Тест 2</label>
                     <div class="test-pair">
-                        <textarea name="test2_input" rows="2" placeholder="Входные данные">{{ ai_test[1].input_data }}</textarea>
-                        <textarea name="test2_output" rows="2" placeholder="Выходные данные">{{ ai_test[1].output }}</textarea>
+                        <textarea name="test2_input" rows="2" placeholder="Входные данные">{{ ai_test[1][0] }}</textarea>
+                        <textarea name="test2_output" rows="2" placeholder="Выходные данные">{{ ai_test[1][1] }}</textarea>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Тест 3</label>
                     <div class="test-pair">
-                        <textarea name="test3_input" rows="2" placeholder="Входные данные">{{ ai_test[2].input_data }}</textarea>
-                        <textarea name="test3_output" rows="2" placeholder="Выходные данные">{{ ai_test[2].output }}</textarea>
+                        <textarea name="test3_input" rows="2" placeholder="Входные данные">{{ ai_test[2][0] }}</textarea>
+                        <textarea name="test3_output" rows="2" placeholder="Выходные данные">{{ ai_test[2][1] }}</textarea>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Тест 4</label>
                     <div class="test-pair">
-                        <textarea name="test4_input" rows="2" placeholder="Входные данные">{{ ai_test[3].input_data }}</textarea>
-                        <textarea name="test4_output" rows="2" placeholder="Выходные данные">{{ ai_test[3].output }}</textarea>
+                        <textarea name="test4_input" rows="2" placeholder="Входные данные">{{ ai_test[3][0] }}</textarea>
+                        <textarea name="test4_output" rows="2" placeholder="Выходные данные">{{ ai_test[3][1] }}</textarea>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Тест 5</label>
                     <div class="test-pair">
-                        <textarea name="test5_input" rows="2" placeholder="Входные данные">{{ ai_test[4].input_data }}</textarea>
-                        <textarea name="test5_output" rows="2" placeholder="Выходные данные">{{ i_test[4].output }}</textarea>
+                        <textarea name="test5_input" rows="2" placeholder="Входные данные">{{ ai_test[4][0] }}</textarea>
+                        <textarea name="test5_output" rows="2" placeholder="Выходные данные">{{ ai_test[4][1] }}</textarea>
                     </div>
                 </div>
                 {% else %}
                 <div class="form-group">
                     <label>Ответ</label>
                     <div class="test-pair">
-                        <textarea name="test_input" rows="2" placeholder="Ответ">{{ ai_test[0].input_data }}</textarea>
+                        <textarea name="test_input" rows="2" placeholder="Ответ">{{ ai_test[0][0] }}</textarea>
                     </div>
                 </div>
                 {% endif %}
-                <fieldset>
-                    <legend>Выберите сложность</legend>
-                    <label>
-                    <input type="radio" name="level" value="легкая">
-                    легкая
-                    </label>
-                    <label>
-                    <input type="radio" name="level" value="средняя" checked>
-                    средняя
-                    </label>
-                    <label>
-                    <input type="radio" name="level" value="сложная">
-                    сложная
-                    </label>
-                </fieldset>
                 <div class="form-actions">
                     <button type="submit">Отправить</button>
                 </div>

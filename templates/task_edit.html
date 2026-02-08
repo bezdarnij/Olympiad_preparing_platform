@@ -92,16 +92,16 @@
                 <fieldset>
                     <legend>Выберите сложность</legend>
                     <label>
-                    <input type="radio" name="level" value="легкая">
-                    легкая
+                        <input type="radio" name="level" value="легкая" {% if db_level == "легкая" %}checked{% endif %}>
+                        легкая
                     </label>
                     <label>
-                    <input type="radio" name="level" value="средняя" checked>
-                    средняя
+                        <input type="radio" name="level" value="средняя" {% if db_level == "средняя" %}checked{% endif %}>
+                        средняя
                     </label>
                     <label>
-                    <input type="radio" name="level" value="сложная">
-                    сложная
+                        <input type="radio" name="level" value="сложная" {% if db_level == "сложная" %}checked{% endif %}>
+                        сложная
                     </label>
                 </fieldset>
                 <div class="form-actions">
