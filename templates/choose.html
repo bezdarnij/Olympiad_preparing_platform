@@ -13,7 +13,7 @@
         placeholder="Введите код комнаты"
     />
     <button onclick="joinByCode()">Войти по коду</button>
-    <p>Список комнат ({{ rooms|length }}):</p>
+    <p class="room-list-title">Список комнат: ({{ rooms|length }}):</p>
     {% if rooms %}
         <ul>
             {% for room_id in rooms %}

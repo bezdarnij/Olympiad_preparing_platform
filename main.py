@@ -76,7 +76,7 @@ def subject(subject='subject'):
     if subject != 'subject':
         session['subject'] = subject
         return redirect(f"/{subject}/")
-    return render_template('subject.html',  subject=subject)
+    return render_template('subject.html', subject=subject)
 
 
 @app.route("/<subject>/")
@@ -398,7 +398,6 @@ def ai(subject_admin, difficulty):
             task_description = request.form.get("task_description")
             input_data = request.form.get("input_data")
             output_data = request.form.get("output_data")
-            level = request.form.get("level")
             theme = request.form.get("theme")
             test_list = []
             test_list.append((request.form.get("test1_input"), request.form.get("test1_output")))
@@ -414,7 +413,7 @@ def ai(subject_admin, difficulty):
                 output_format=output_data,
                 memory_limit=memory_limit,
                 time_limit=time_limit,
-                difficulty=level,
+                difficulty=ai_level,
                 theme=theme
             )
             task_id = db_sess.query(Tasks).all()[-1].id + 1
@@ -432,13 +431,12 @@ def ai(subject_admin, difficulty):
             db_sess = db_session.create_session()
             task_name = request.form.get("task_name")
             task_description = request.form.get("task_description")
-            level = request.form.get("level")
             theme = request.form.get("theme")
             task = Tasks(
                 subject=subject_admin,
                 title=task_name,
                 statement=task_description,
-                difficulty=level,
+                difficulty=ai_level,
                 theme=theme
             )
             task_id = db_sess.query(Tasks).all()[-1].id + 1
@@ -576,6 +574,7 @@ def admin_task_edit(task_id=1):
                            db_subject=db_subject, db_test=db_test)
 
 
+# ===== ИЗМЕНЕНИЯ ДЛЯ ФИЛЬТРАЦИИ КОМНАТ ПО ПРЕДМЕТУ =====
 @app.route('/<subject>/pvp/create')
 @login_required
 @user_ban
@@ -584,7 +583,8 @@ def create_pvp(subject):
     session['room'] = room
     matches[room] = {
         'players': [current_user.id],
-        'completed': {str(current_user.id): 0}
+        'completed': {str(current_user.id): 0},
+        'subject': subject  # Добавляем предмет в структуру комнаты
     }
     return redirect(f'/{subject}/pvp/room/{room}')
 
@@ -595,10 +595,17 @@ def create_pvp(subject):
 def join_pvp(subject, room):
     if room not in matches:
         abort(404)
+    
+    # Проверяем, что комната относится к выбранному предмету
+    if matches[room].get('subject') != subject:
+        abort(404)
+    
     if len(matches[room]['players']) >= 2:
         return "комната заполнена", 400
+    
     if current_user.id in matches[room]['players']:
         return redirect(f'/{subject}/pvp/room/{room}')
+    
     matches[room]['players'].append(current_user.id)
     matches[room]['completed'][str(current_user.id)] = 0
     session['room'] = room
@@ -611,9 +618,11 @@ def join_pvp(subject, room):
 def pvp_choose(subject):
     open_rooms = []
     for room_id, info in matches.items():
-        if len(info['players']) < 2:
+        # Фильтруем только комнаты текущего предмета
+        if info.get('subject') == subject and len(info['players']) < 2:
             open_rooms.append(room_id)
     return render_template('choose.html', rooms=open_rooms, subject=subject)
+# ===== КОНЕЦ ИЗМЕНЕНИЙ =====
 
 
 @app.route('/<subject>/task/<int:task_id>', methods=["GET", "POST"])
@@ -844,12 +853,6 @@ def pvp_room(subject, room):
                 )
             db_sess.add(submission_result)
             db_sess.commit()
-
-            uid = str(current_user.id)
-            matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), test_passed)
-            if len(matches[room]['completed']) == 2 and not matches[room].get('finished'):
-                result = finish_match(room)
-                socketio.emit('match_finished', {'result': result}, room=room)
 
             return redirect(f"/{subject}/pvp/room/{room}")
 

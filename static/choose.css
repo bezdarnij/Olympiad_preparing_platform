@@ -152,6 +152,13 @@
     margin: 0;
 }
 
+.choose .room-list-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937; /* Чёрный */
+    margin: 36px 0 20px;
+}
+
 .choose li {
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(20px);
