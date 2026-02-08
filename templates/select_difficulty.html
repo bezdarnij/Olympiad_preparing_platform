@@ -1,9 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Выбор предмета{% endblock %}
-{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='subject.css') }}">{% endblock %}
+{% block title %}Выбор сложности{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='select_difficulty.css') }}">{% endblock %}
 {% block content %}
-<h1>Выберите сложность</h1>
-<a href="/admin/task_ai/{{ subject_admin }}/легкая">легкая</a>
-<a href="/admin/task_ai/{{ subject_admin }}/средняя">средняя</a>
-<a href="/admin/task_ai/{{ subject_admin }}/сложная">сложная</a>
+<div class="difficulty-page">
+    <h1>Выберите сложность</h1>
+    <div class="difficulty-buttons">
+        <a href="/admin/task_ai/{{ subject_admin }}/легкая" class="difficulty-btn difficulty-easy">легкая</a>
+        <a href="/admin/task_ai/{{ subject_admin }}/средняя" class="difficulty-btn difficulty-medium">средняя</a>
+        <a href="/admin/task_ai/{{ subject_admin }}/сложная" class="difficulty-btn difficulty-hard">сложная</a>
+    </div>
+</div>
 {% endblock %}

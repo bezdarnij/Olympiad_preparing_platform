@@ -1,6 +1,3 @@
-/* ===== Tasks Catalog Page Styles ===== */
-
-/* ===== Main Title ===== */
 h1 {
     font-size: 36px;
     font-weight: 800;
@@ -12,7 +9,6 @@ h1 {
     background-clip: text;
 }
 
-/* ===== Sort Form ===== */
 form {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
@@ -20,54 +16,96 @@ form {
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 32px;
-    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.1);
+    box-shadow: 0 8px 32px rgba(124, 58, 237, 0.12);
+    animation: fadeIn 0.5s ease-out 0.1s backwards;
+    transition: all 0.3s ease;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 16px;
 }
 
+form:hover {
+    box-shadow: 0 12px 40px rgba(124, 58, 237, 0.18);
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
 form br {
     display: none;
 }
-
 
 form > text {
     display: none;
 }
 
-/* ===== Select Dropdown ===== */
+form h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #7c3aed;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #7c3aed;
+    margin-right: 8px;
+    transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:hover {
+    transform: scale(1.05);
+}
+
+form label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #4c1d95;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    margin-right: 12px;
+    display: inline;
+}
+
+form label:hover {
+    color: #7c3aed;
+}
+
 select {
-    padding: 10px 16px;
+    padding: 10px 14px;
     border: 2px solid rgba(168, 85, 247, 0.3);
     border-radius: 10px;
     background: #ffffff;
     color: #4c1d95;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);
-    min-width: 200px;
+    min-width: 160px;
 }
 
 select:hover {
     border-color: #7c3aed;
-    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.15);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.12);
 }
 
 select:focus {
     outline: none;
     border-color: #7c3aed;
-    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-/* ===== Sort Button ===== */
-.btn-secondary {
+form input[type="submit"] {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #ffffff !important;
-    font-size: 15px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     padding: 10px 24px;
     border: none;
     border-radius: 10px;
@@ -78,7 +116,7 @@ select:focus {
     overflow: hidden;
 }
 
-.btn-secondary::before {
+form input[type="submit"]::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -88,22 +126,38 @@ select:focus {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.2);
     transform: translate(-50%, -50%);
-    transition: width 0.5s ease, height 0.5s ease;
+    transition: width 0.6s ease, height 0.6s ease;
 }
 
-.btn-secondary:hover::before {
+form input[type="submit"]:hover::before {
     width: 300px;
     height: 300px;
 }
 
-.btn-secondary:hover {
+form input[type="submit"]:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
-    background: linear-gradient(135deg, #6d28d9, #7c3aed);
-    color: #ffffff !important;
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
 }
 
-/* ===== Task Cards ===== */
+form a {
+    color: #7c3aed;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 20px;
+    border: 2px solid rgba(124, 58, 237, 0.3);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+form a:hover {
+    color: #ffffff;
+    background: #7c3aed;
+    border-color: #7c3aed;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3);
+    transform: translateY(-2px);
+}
+
 .col-md-6 {
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(20px);
@@ -122,7 +176,6 @@ select:focus {
     border-color: rgba(168, 85, 247, 0.4) !important;
 }
 
-/* ===== Task List Item ===== */
 .col-md-6 li {
     list-style: none;
     margin: 0 0 16px 0;
@@ -143,7 +196,6 @@ select:focus {
     transform: translateX(4px);
 }
 
-/* ===== Task Details ===== */
 .col-md-6 p {
     color: #6b7280;
     font-size: 15px;
@@ -165,7 +217,6 @@ select:focus {
     font-size: 18px;
 }
 
-/* ===== Empty State ===== */
 .page-content > p:last-child {
     text-align: center;
     font-size: 18px;
@@ -177,7 +228,6 @@ select:focus {
     margin-top: 20px;
 }
 
-/* ===== Responsive Design ===== */
 @media (max-width: 768px) {
     h1 {
         font-size: 28px;
@@ -185,21 +235,49 @@ select:focus {
     }
 
     form {
+        padding: 16px;
         flex-direction: column;
         align-items: stretch;
-        padding: 20px;
+    }
+
+    form h3 {
+        font-size: 12px;
+        margin-top: 12px;
+        margin-bottom: 6px;
+        width: 100%;
+    }
+
+    form h3:first-of-type {
+        margin-top: 0;
     }
 
     select {
         width: 100%;
+        min-width: auto;
+        padding: 8px 12px;
+        font-size: 13px;
     }
 
-    .btn-secondary {
+    form input[type="submit"],
+    form a {
         width: 100%;
+        text-align: center;
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    form input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+
+    form label {
+        font-size: 13px;
+        margin-right: 10px;
     }
 
     .col-md-6 {
-        padding: 20px;
+        padding: 16px;
     }
 
     .col-md-6 li a {
@@ -209,11 +287,49 @@ select:focus {
 
 @media (max-width: 480px) {
     h1 {
-        font-size: 24px;
+        font-size: 22px;
+    }
+
+    form {
+        padding: 12px;
+        flex-direction: column;
+    }
+
+    form h3 {
+        font-size: 11px;
+        margin-top: 10px;
+        margin-bottom: 6px;
+        width: 100%;
+    }
+
+    form h3:first-of-type {
+        margin-top: 0;
+    }
+
+    select {
+        padding: 8px 10px;
+        font-size: 12px;
+        width: 100%;
+    }
+
+    form input[type="submit"],
+    form a {
+        padding: 8px 12px;
+        font-size: 12px;
+        width: 100%;
+    }
+
+    form input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+
+    form label {
+        font-size: 12px;
     }
 
     .col-md-6 {
-        padding: 16px;
+        padding: 12px;
     }
 
     .col-md-6 li a {
@@ -221,7 +337,6 @@ select:focus {
     }
 }
 
-/* ===== Animations ===== */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -250,7 +365,6 @@ form {
 .col-md-6:nth-child(7) { animation-delay: 0.35s; }
 .col-md-6:nth-child(8) { animation-delay: 0.4s; }
 
-/* ===== Grid Layout for Task Cards ===== */
 .page-content {
     display: grid;
     grid-template-columns: 1fr;
@@ -268,7 +382,6 @@ form {
     }
 }
 
-/* ===== Difficulty Badge Styling ===== */
 .col-md-6 p:last-of-type {
     position: relative;
 }
@@ -288,4 +401,55 @@ form {
 .solved_task {
     display: flex;
     justify-content: space-between;
+}
+
+.task-meta {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 2px solid rgba(168, 85, 247, 0.1);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: #ffffff;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    color: #ffffff;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
+.badge-default {
+    background: linear-gradient(135deg, #6b7280, #9ca3af);
+    color: #ffffff;
+    border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.badge-default:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(107, 114, 128, 0.3);
 }

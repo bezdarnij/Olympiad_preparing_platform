@@ -1,6 +1,3 @@
-/* ===== Subject Selection Page Styles ===== */
-
-/* ===== Main Title ===== */
 h1 {
     font-size: 36px;
     font-weight: 800;
@@ -27,7 +24,6 @@ h1::after {
     border-radius: 2px;
 }
 
-/* ===== Subject Links Container ===== */
 .page-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -37,7 +33,6 @@ h1::after {
     padding: 20px;
 }
 
-/* ===== Subject Cards ===== */
 .page-content > a {
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(12px);
@@ -61,7 +56,6 @@ h1::after {
     line-height: 1.3;
 }
 
-/* ===== Subject Icons ===== */
 .page-content > a::before {
     content: '';
     font-size: 56px;
@@ -83,7 +77,6 @@ h1::after {
 .page-content > a[href*="литература"]::before { content: '📖'; }
 .page-content > a[href*="история"]::before { content: '🏛️'; }
 
-/* ===== Hover Effects ===== */
 .page-content > a::after {
     content: '';
     position: absolute;
@@ -114,7 +107,6 @@ h1::after {
     transform: scale(1.15) rotate(5deg);
 }
 
-/* ===== Active/Focus States ===== */
 .page-content > a:active {
     transform: translateY(-3px) scale(0.995);
     box-shadow: 0 6px 20px rgba(79, 70, 229, 0.18);
@@ -125,8 +117,6 @@ h1::after {
     box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.25), 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-/* ===== Subject-Specific Colors ===== */
-/* Цвета подобраны по ассоциациям с предметами + хорошая контрастность */
 .page-content > a[href*="информатика"] { color: #1e40af; border-color: rgba(59, 130, 246, 0.2); }
 .page-content > a[href*="информатика"]:hover { border-color: #3b82f6; color: #1d4ed8; }
 .page-content > a[href*="математика"] { color: #b45309; border-color: rgba(245, 158, 11, 0.2); }
@@ -148,7 +138,6 @@ h1::after {
 .page-content > a[href*="история"] { color: #9d174d; border-color: rgba(157, 23, 77, 0.2); }
 .page-content > a[href*="история"]:hover { border-color: #be123c; color: #831843; }
 
-/* ===== Animations ===== */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -175,7 +164,6 @@ h1 {
     opacity: 0;
 }
 
-/* Автоматическая задержка для всех карточек через CSS-переменные */
 .page-content > a:nth-child(1) { --order: 1; animation-delay: 0.1s; }
 .page-content > a:nth-child(2) { --order: 2; animation-delay: 0.18s; }
 .page-content > a:nth-child(3) { --order: 3; animation-delay: 0.26s; }
@@ -186,12 +174,21 @@ h1 {
 .page-content > a:nth-child(8) { --order: 8; animation-delay: 0.66s; }
 .page-content > a:nth-child(9) { --order: 9; animation-delay: 0.74s; }
 .page-content > a:nth-child(10) { --order: 10; animation-delay: 0.82s; }
+.page-content > a:nth-child(11) { --order: 11; animation-delay: 0.9s; }
+.page-content > a:nth-child(12) { --order: 12; animation-delay: 0.98s; }
+.page-content > a:nth-child(13) { --order: 13; animation-delay: 1.06s; }
+.page-content > a:nth-child(14) { --order: 14; animation-delay: 1.14s; }
+.page-content > a:nth-child(15) { --order: 15; animation-delay: 1.22s; }
+.page-content > a:nth-child(16) { --order: 16; animation-delay: 1.3s; }
+.page-content > a:nth-child(17) { --order: 17; animation-delay: 1.38s; }
+.page-content > a:nth-child(18) { --order: 18; animation-delay: 1.46s; }
+.page-content > a:nth-child(19) { --order: 19; animation-delay: 1.54s; }
+.page-content > a:nth-child(20) { --order: 20; animation-delay: 1.62s; }
 
 .page-content > a:hover::before {
     animation: iconBounce 0.6s ease-in-out;
 }
 
-/* ===== Responsive Design ===== */
 @media (max-width: 768px) {
     h1 {
         font-size: 28px;
@@ -244,7 +241,6 @@ h1 {
     }
 }
 
-/* ===== Accessibility Enhancements ===== */
 @media (prefers-reduced-motion: reduce) {
     * {
         animation-duration: 0.01ms !important;
@@ -258,7 +254,6 @@ h1 {
     }
 }
 
-/* Для устройств с сенсорным экраном */
 @media (hover: none) {
     .page-content > a:hover {
         transform: scale(1.01);

@@ -593,12 +593,12 @@ def create_pvp(subject):
     ai_input_data = ai_task.get("входные данные")
     ai_output_data = ai_task.get("выходные данные")
     ai_test = []
-    if subject_admin == 'информатика':
+    if subject == 'информатика':
         for i in range(1, 6):
             ai_test.append((ai_task.get(f"входные данные тест {i}"), ai_task.get(f"выходные данные тест {i}")))
     else:
         ai_test.append((ai_task.get("ответ"), ""))
-    if subject_admin == 'информатика':
+    if subject == 'информатика':
         db_sess = db_session.create_session()
         task_name =  ai_task_name
         memory_limit = ai_memory_limit
@@ -732,7 +732,6 @@ def training(subject, task_id):
                     out, err = p.communicate(test.input_data, timeout=task.time_limit)
                     out = out.strip()
                     if err:
-                        print(err)
                         submission_result = Submissions(
                             user_id=current_user.id,
                             task_id=task_id,
@@ -753,9 +752,7 @@ def training(subject, task_id):
                     )
                     f_err = 1
                     p.kill()
-            print(f"Пройдено тестов: {test_passed}")
             if test_passed == 5:
-                print("OK")
                 submission_result = Submissions(
                     user_id=current_user.id,
                     task_id=task_id,
@@ -763,7 +760,6 @@ def training(subject, task_id):
                     total_tests=test_passed,
                 )
             elif f_err == 0:
-                print("неверный ответ")
                 submission_result = Submissions(
                     user_id=current_user.id,
                     task_id=task_id,
@@ -813,7 +809,7 @@ def training(subject, task_id):
 @login_required
 @user_ban
 def pvp_room(subject, room):
-    ochko = 0
+    matches[room]['ochko'] = 0
     task_id = matches[room]['task_id']
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
@@ -822,6 +818,10 @@ def pvp_room(subject, room):
     submission_id = len(submission) + 1
     if subject == 'информатика':
         if request.method == "POST":
+            if len(matches[room]['players']) <= 1:
+                    message = "Ожидание второго игрока"
+                    return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=[],
+                            verdict=message, test_passed=None, subject=subject)
             file = request.files.get("file")
             if not file or file.filename == "":
                 abort(400, "Файл не выбран")
@@ -834,7 +834,7 @@ def pvp_room(subject, room):
             f_err = 0
             for test in task_test:
                 p = subprocess.Popen(
-                    ["python3", f"submission_{submission_id}.py"],
+                    ["python", f"submission_{submission_id}.py"],
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
@@ -866,17 +866,15 @@ def pvp_room(subject, room):
                     )
                     f_err = 1
                     p.kill()
-            print(f"Пройдено тестов: {test_passed}")
             if test_passed == 5:
-                print("OK")
                 submission_result = Submissions(
                     user_id=current_user.id,
                     task_id=task_id,
                     verdict="OK",
                     total_tests=test_passed,
                 )
+                matches[room]['ochko'] = 1
             elif f_err == 0:
-                print("неверный ответ")
                 submission_result = Submissions(
                     user_id=current_user.id,
                     task_id=task_id,
@@ -887,12 +885,12 @@ def pvp_room(subject, room):
             db_sess.commit()
 
             uid = str(current_user.id)
-            matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), test_passed)
-            if len(matches[room]['completed']) == 2 and not matches[room].get('finished'):
+            matches[room]['completed'][uid] = matches[room]['ochko']
+            if matches[room]['ochko'] == 1:
                 result = finish_match(room)
                 socketio.emit('match_finished', {'result': result}, room=room)
 
-            return redirect(f"/{subject}/pvp/room/{room}")
+                return redirect(f"/{subject}/pvp/results/{room}")
 
         players_info = []
         for uid_str in matches[room]['players']:
@@ -911,6 +909,9 @@ def pvp_room(subject, room):
         return render_template('Pvp.html', room=room, task=task, test=task_test[0], players_info=players_info,
                             verdict=verdict, test_passed=test_passed, subject=subject)
     else:
+        if len(matches[room]['players']) <= 1:
+                message = "Ожидание второго игрока"
+                return render_template('pvp_other.html', room=room, task=task, test=task_test[0], players_info=[], verdict=message, subject=subject)
         if request.method == "POST":
             answer = request.form.get("answer").lower()
             if task_test[0].input_data.lower() == answer:
@@ -919,7 +920,7 @@ def pvp_room(subject, room):
                     task_id=task_id,
                     verdict="OK",
                 )
-                ochko = 1
+                matches[room]['ochko'] = 1
             else:
                 submission_result = Submissions(
                     user_id=current_user.id,
@@ -930,13 +931,12 @@ def pvp_room(subject, room):
             db_sess.commit()
 
             uid = str(current_user.id)
-            matches[room]['completed'][uid] = ochko
-            print(matches[room]['completed'])
-            if len(matches[room]['completed']) > 0:
+            matches[room]['completed'][uid] = matches[room]['ochko']
+            if matches[room]['ochko'] == 1:
                 result = finish_match(room)
                 socketio.emit('match_finished', {'result': result}, room=room)
 
-                return redirect(f"/{subject}/")
+                return redirect(f"/{subject}/pvp/results/{room}")
 
         players_info = []
         for uid_str in matches[room]['players']:
@@ -978,6 +978,40 @@ def finish_match(room):
     matches[room]['finished'] = True
     matches[room]['result'] = result
     return result
+
+
+@app.route('/<subject>/pvp/results/<room>')
+@login_required
+@user_ban
+def pvp_results(subject, room):
+    if room not in matches or not matches[room].get('finished'):
+        return redirect(f"/{subject}/")
+
+    db_sess = db_session.create_session()
+
+    players_data = []
+    result_text = matches[room]['result']
+    completed = matches[room]['completed']
+
+    winner_name = None
+    if "победил" in result_text:
+        winner_name = result_text.split()[0]
+
+    for uid in matches[room]['players']:
+        user = db_sess.get(User, uid)
+        players_data.append({
+            "name": user.name,
+            "score": completed.get(str(uid), 0),
+            "elo": user.elo_rating,
+            "is_winner": user.name == winner_name
+        })
+
+    return render_template(
+        "pvp_results.html",
+        players=players_data,
+        result=result_text,
+        subject=subject
+    )
 
 
 @socketio.on('join')

@@ -1,11 +1,9 @@
-/* ===== Profile Container ===== */
 .profile-container {
     max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
 }
 
-/* ===== Profile Header ===== */
 .profile-header {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
@@ -22,7 +20,6 @@
     border-color: rgba(168, 85, 247, 0.3);
 }
 
-/* ===== User Info Section ===== */
 .user-info {
     display: flex;
     align-items: center;
@@ -32,7 +29,6 @@
     border-bottom: 2px solid rgba(168, 85, 247, 0.15);
 }
 
-/* ===== Avatar ===== */
 .avatar {
     width: 90px;
     height: 90px;
@@ -70,7 +66,6 @@
     }
 }
 
-/* ===== User Details ===== */
 .user-details h1 {
     font-size: 32px;
     font-weight: 800;
@@ -94,7 +89,6 @@
     margin: 4px 0;
 }
 
-/* ===== Stats Cards ===== */
 .stats-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -152,7 +146,6 @@
     letter-spacing: 0.5px;
 }
 
-/* ===== Profile Content ===== */
 .profile-content {
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(20px);
@@ -173,14 +166,12 @@
     background-clip: text;
 }
 
-/* ===== Tasks List ===== */
 .tasks-list {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-/* ===== Task Item ===== */
 .task-item {
     background: rgba(255, 255, 255, 0.8);
     border: 2px solid rgba(168, 85, 247, 0.15);
@@ -199,7 +190,6 @@
     border-left: 4px solid #10b981;
 }
 
-/* ===== Task Header ===== */
 .task-header {
     display: flex;
     justify-content: space-between;
@@ -232,7 +222,6 @@
     text-decoration: underline;
 }
 
-/* ===== Status Badge ===== */
 .status-badge {
     padding: 6px 14px;
     border-radius: 8px;
@@ -254,13 +243,11 @@
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
 }
 
-/* ===== Task Meta ===== */
 .task-meta {
     display: flex;
     gap: 12px;
 }
 
-/* ===== Difficulty Badge ===== */
 .difficulty {
     padding: 6px 14px;
     border-radius: 8px;
@@ -286,7 +273,6 @@
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
 }
 
-/* ===== Task Stats ===== */
 .task-stats {
     display: flex;
     flex-wrap: wrap;
@@ -307,7 +293,6 @@
     font-size: 16px;
 }
 
-/* ===== No Tasks Section ===== */
 .no-tasks {
     text-align: center;
     padding: 60px 20px;
@@ -341,7 +326,6 @@
     color: #ffffff !important;
 }
 
-/* ===== Responsive Design ===== */
 @media (max-width: 768px) {
     .profile-header {
         padding: 24px;
@@ -396,7 +380,6 @@
     }
 }
 
-/* ===== Animations ===== */
 @keyframes fadeInUp {
     from {
         opacity: 0;

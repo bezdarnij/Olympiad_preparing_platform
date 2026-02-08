@@ -1,6 +1,3 @@
-/* ===== PvP Page Styles ===== */
-
-/* ===== Main Title ===== */
 h1 {
     font-size: 36px;
     font-weight: 800;
@@ -12,7 +9,6 @@ h1 {
     background-clip: text;
 }
 
-/* ===== Room ID Display ===== */
 .page-content > p:first-of-type {
     text-align: center;
     font-size: 18px;
@@ -30,7 +26,6 @@ h1 {
     color: #7c3aed;
 }
 
-/* ===== Condition Section ===== */
 .condition {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
@@ -71,7 +66,6 @@ h1 {
     color: #1f2937;
 }
 
-/* ===== Input/Output Format Section ===== */
 .Input {
     background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
     border: 2px solid rgba(168, 85, 247, 0.25);
@@ -89,7 +83,6 @@ h1 {
     font-weight: 500;
 }
 
-/* ===== Examples Section ===== */
 .examples {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -154,7 +147,6 @@ h1 {
     background: #a855f7;
 }
 
-/* ===== Verdict Section ===== */
 .page-content > p:not(:first-of-type) {
     background: rgba(255, 255, 255, 0.8);
     border: 2px solid rgba(168, 85, 247, 0.2);
@@ -167,7 +159,6 @@ h1 {
     box-shadow: 0 4px 15px rgba(124, 58, 237, 0.08);
 }
 
-/* ===== Task Section ===== */
 .task {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
@@ -178,7 +169,6 @@ h1 {
     box-shadow: 0 8px 32px rgba(124, 58, 237, 0.12);
 }
 
-/* ===== Form Section ===== */
 .send {
     display: flex;
     flex-direction: column;
@@ -189,7 +179,6 @@ h1 {
     border-bottom: 2px solid rgba(168, 85, 247, 0.15);
 }
 
-/* ===== File Input ===== */
 input[type="file"] {
     padding: 14px 18px;
     border: 2px solid rgba(168, 85, 247, 0.3);
@@ -234,7 +223,6 @@ input[type="file"]::file-selector-button:hover {
     box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
 }
 
-/* ===== Submit Button ===== */
 .send button[type="submit"] {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #ffffff !important;
@@ -279,7 +267,6 @@ input[type="file"]::file-selector-button:hover {
     transform: translateY(-1px);
 }
 
-/* ===== Scores Section ===== */
 .scores {
     display: flex;
     flex-direction: column;
@@ -319,7 +306,6 @@ input[type="file"]::file-selector-button:hover {
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
 }
 
-/* ===== Responsive Design ===== */
 @media (max-width: 768px) {
     h1 {
         font-size: 28px;
@@ -357,7 +343,6 @@ input[type="file"]::file-selector-button:hover {
     }
 }
 
-/* ===== Animations ===== */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -390,7 +375,6 @@ input[type="file"]::file-selector-button:hover {
 .examples { animation-delay: 0.3s; }
 .task { animation-delay: 0.4s; }
 
-/* ===== Score Update Animation ===== */
 .scores span {
     transition: all 0.3s ease;
 }

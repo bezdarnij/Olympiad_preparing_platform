@@ -15,7 +15,7 @@
     <p>{{ task.statement }}</p>
 </div>
 
-<p>Вердикт: {{ verdict }}</p>
+<p>Вердикт: <span id="verdict-player"></span></p>
 
 <div class="task">
     <form class="send" method="post">
@@ -52,10 +52,20 @@ socket.on('update_scores', function (data) {
             opponentScore = data.scores[i].score
         }
     }
+    if (data.player_count > 1) {
+        document.getElementById('verdict-player').textContent = '{{ verdict }}'
+    }
+    else {
+         document.getElementById('verdict-player').textContent = "Ожидание второго игрока"
+    }
     document.getElementById('your-score').textContent = yourScore
     document.getElementById('opponent-score').textContent = opponentScore
     document.getElementById('player-count').textContent = data.player_count
 })
 
+socket.on('match_finished', function(data) {
+    alert(data.result)
+    window.location.href = `/{{ subject }}/pvp/results/{{ room }}`
+})
 </script>
 {% endblock %}
