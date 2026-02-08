@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}PvP Режим{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='pvp.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Режим PvP</h1>
+<p><strong>ID комнаты:</strong> {{ room }}</p>
+
+<div class="condition">
+    <h2>{{ task.title }}</h2>
+    <p>{{ task.statement }}</p>
+</div>
+
+<p>Вердикт: {{ verdict }}</p>
+
+<div class="task">
+    <form class="send" method="post">
+        <div class="answer_field">
+            <label>Введите ответ: </label>
+            <input type="text" name="answer" />
+        </div>
+        <button type="submit" id="submitBtn">Отправить ответ</button>
+    </form>
+    <div class="scores">
+        <p>Соперник решил задач: <span id="opponent-score">0</span></p>
+        <p>Ты решил задач: <span id="your-score">0</span></p>
+        <p>Количество пользователей в комнате: <span id="player-count">0</span></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+const socket = io()
+const room = '{{ room }}'
+const myName = '{{ current_user.name }}'
+
+socket.emit('join', { room: room })
+
+socket.on('update_scores', function (data) {
+    let yourScore = 0
+    let opponentScore = 0
+    for (let i = 0; i < data.scores.length; i++) {
+        if (data.scores[i].name === myName) {
+            yourScore = data.scores[i].score
+        } else {
+            opponentScore = data.scores[i].score
+        }
+    }
+    document.getElementById('your-score').textContent = yourScore
+    document.getElementById('opponent-score').textContent = opponentScore
+    document.getElementById('player-count').textContent = data.player_count
+})
+
+</script>
+{% endblock %}

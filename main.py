@@ -731,7 +731,7 @@ def training(subject, task_id):
 @login_required
 @user_ban
 def pvp_room(subject, room):
-    task_id = 2
+    task_id = 4
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
@@ -842,6 +842,22 @@ def pvp_room(subject, room):
                     task_id=task_id,
                     verdict="Неверный ответ, попробуйте снова",
                 )
+            db_sess.add(submission_result)
+            db_sess.commit()
+
+            uid = str(current_user.id)
+            matches[room]['completed'][uid] = max(matches[room]['completed'].get(uid, 0), test_passed)
+            if len(matches[room]['completed']) == 2 and not matches[room].get('finished'):
+                result = finish_match(room)
+                socketio.emit('match_finished', {'result': result}, room=room)
+
+            return redirect(f"/{subject}/pvp/room/{room}")
+
+        players_info = []
+        for uid_str in matches[room]['players']:
+            user = db_sess.get(User, int(uid_str))
+            players_info.append({'name': user.name, 'elo': user.elo_rating})
+
         last_submission = db_sess.query(Submissions).filter(Submissions.user_id == current_user.id,
                                                     Submissions.task_id == task_id).all()
         if last_submission:
@@ -849,7 +865,7 @@ def pvp_room(subject, room):
             verdict = result.verdict
         else:
             verdict = "Нет сданных решений"
-        return render_template('training_other.html', task=task, verdict=verdict, subject=subject)
+        return render_template('pvp_other.html', task=task, verdict=verdict, subject=subject, room=room, test=task_test[0], players_info=players_info)
 
 
 def finish_match(room):
