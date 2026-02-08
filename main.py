@@ -375,6 +375,8 @@ def ai(subject_admin, difficulty):
     ai_subject = subject_admin
     ai_difficulty = difficulty
     ai_task = generate_task(ai_difficulty, ai_subject)
+    while ai_task.get("error") is not None:
+        ai_task = generate_task(ai_difficulty, subject)
     ai_theme = ai_task.get("тема")
     ai_task_name = ai_task.get("название задачи")
     ai_task_description = ai_task.get("условие задачи")
@@ -574,17 +576,91 @@ def admin_task_edit(task_id=1):
                            db_subject=db_subject, db_test=db_test)
 
 
-# ===== ИЗМЕНЕНИЯ ДЛЯ ФИЛЬТРАЦИИ КОМНАТ ПО ПРЕДМЕТУ =====
 @app.route('/<subject>/pvp/create')
 @login_required
 @user_ban
 def create_pvp(subject):
+    ai_difficulty = "средняя"
+    ai_task = generate_task(ai_difficulty, subject)
+    while ai_task.get("error") is not None:
+        ai_task = generate_task(ai_difficulty, subject)
+    ai_theme = ai_task.get("тема")
+    ai_task_name = ai_task.get("название задачи")
+    ai_task_description = ai_task.get("условие задачи")
+    ai_level = ai_difficulty
+    ai_memory_limit = ai_task.get("лимит памяти")
+    ai_time_limit = ai_task.get("лимит времени")
+    ai_input_data = ai_task.get("входные данные")
+    ai_output_data = ai_task.get("выходные данные")
+    ai_test = []
+    if subject_admin == 'информатика':
+        for i in range(1, 6):
+            ai_test.append((ai_task.get(f"входные данные тест {i}"), ai_task.get(f"выходные данные тест {i}")))
+    else:
+        ai_test.append((ai_task.get("ответ"), ""))
+    if subject_admin == 'информатика':
+        db_sess = db_session.create_session()
+        task_name =  ai_task_name
+        memory_limit = ai_memory_limit
+        time_limit = ai_time_limit
+        task_description = ai_task_description
+        input_data = ai_input_data
+        output_data = ai_output_data
+        theme = ai_theme
+        test_list = []
+        test_list.append((ai_test[0][0], ai_test[0][1]))
+        test_list.append((ai_test[1][0], ai_test[1][1]))
+        test_list.append((ai_test[2][0], ai_test[2][1]))
+        test_list.append((ai_test[3][0], ai_test[3][1]))
+        test_list.append((ai_test[4][0], ai_test[4][1]))
+        task = Tasks(
+            subject=subject,
+            title=task_name,
+            statement=task_description,
+            input_format=input_data,
+            output_format=output_data,
+            memory_limit=memory_limit,
+            time_limit=time_limit,
+            difficulty=ai_level,
+            theme=theme
+        )
+        task_id = db_sess.query(Tasks).all()[-1].id + 1
+        for i in range(5):
+            task_test = TaskTest(
+                task_id=task_id,
+                input_data=test_list[i][0],
+                output=test_list[i][1],
+            )
+            db_sess.add(task_test)
+        db_sess.add(task)
+        db_sess.commit()
+    else:
+        db_sess = db_session.create_session()
+        task_name = ai_task_name
+        task_description = ai_task_description
+        theme = ai_theme
+        task = Tasks(
+            subject=subject,
+            title=task_name,
+            statement=task_description,
+            difficulty=ai_level,
+            theme=theme
+        )
+        task_id = db_sess.query(Tasks).all()[-1].id + 1
+        task_test = TaskTest(
+            task_id=task_id,
+            input_data=ai_test[0][0],
+        )
+        db_sess.add(task_test)
+        db_sess.add(task)
+        db_sess.commit()
     room = str(uuid.uuid4())
     session['room'] = room
     matches[room] = {
         'players': [current_user.id],
         'completed': {str(current_user.id): 0},
-        'subject': subject  # Добавляем предмет в структуру комнаты
+        'subject': subject,
+        'task_id': task_id
     }
     return redirect(f'/{subject}/pvp/room/{room}')
 
@@ -596,7 +672,6 @@ def join_pvp(subject, room):
     if room not in matches:
         abort(404)
     
-    # Проверяем, что комната относится к выбранному предмету
     if matches[room].get('subject') != subject:
         abort(404)
     
@@ -618,11 +693,9 @@ def join_pvp(subject, room):
 def pvp_choose(subject):
     open_rooms = []
     for room_id, info in matches.items():
-        # Фильтруем только комнаты текущего предмета
         if info.get('subject') == subject and len(info['players']) < 2:
             open_rooms.append(room_id)
     return render_template('choose.html', rooms=open_rooms, subject=subject)
-# ===== КОНЕЦ ИЗМЕНЕНИЙ =====
 
 
 @app.route('/<subject>/task/<int:task_id>', methods=["GET", "POST"])
@@ -740,7 +813,8 @@ def training(subject, task_id):
 @login_required
 @user_ban
 def pvp_room(subject, room):
-    task_id = 4
+    ochko = 0
+    task_id = matches[room]['task_id']
     db_sess = db_session.create_session()
     task = db_sess.get(Tasks, task_id)
     task_test = db_sess.query(TaskTest).filter(TaskTest.task_id == task.id).all()
@@ -845,6 +919,7 @@ def pvp_room(subject, room):
                     task_id=task_id,
                     verdict="OK",
                 )
+                ochko = 1
             else:
                 submission_result = Submissions(
                     user_id=current_user.id,
@@ -853,6 +928,13 @@ def pvp_room(subject, room):
                 )
             db_sess.add(submission_result)
             db_sess.commit()
+
+            uid = str(current_user.id)
+            matches[room]['completed'][uid] = ochko
+            print(matches[room]['completed'])
+            if len(matches[room]['completed']) > 0:
+                result = finish_match(room)
+                socketio.emit('match_finished', {'result': result}, room=room)
 
             return redirect(f"/{subject}/pvp/room/{room}")
 
