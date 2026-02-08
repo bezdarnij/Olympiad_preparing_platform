@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Управление результатами{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='admin_first.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin_results.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Результаты</h1>
+
+<div class="admin-actions">
+    <a class="btn btn-task" href="/admin">Пользователи</a>
+    <a class="btn btn-task" href="/admin/task_list">Задачи</a>
+    <a class="btn btn-task" href="/admin/competitions">Соревнования</a>
+</div>
+
+{% if message %}
+<div class="alert success">{{ message }}</div>
+{% endif %}
+
+<div class="table-container">
+    <table>
+        <tr>
+            <td>id</td>
+            <td>created</td>
+            <td>user</td>
+            <td>task</td>
+            <td>subject</td>
+            <td>verdict</td>
+            <td>tests</td>
+            <td>actions</td>
+        </tr>
+        {% for s in submissions %}
+        <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.created_at }}</td>
+            <td>{{ s.user.name if s.user else ("#" ~ s.user_id) }}</td>
+            <td>{{ s.tasks.title if s.tasks else ("#" ~ s.task_id) }}</td>
+            <td>{{ s.tasks.subject if s.tasks else "-" }}</td>
+            <td>{{ s.verdict or "-" }}</td>
+            <td>{{ s.total_tests if s.total_tests is not none else "-" }}</td>
+            <td>
+                <form method="post" class="inline-form">
+                    <input type="hidden" name="submission_id" value="{{ s.id }}">
+                    <input type="hidden" name="action" value="delete">
+                    <button type="submit" class="btn btn-small btn-danger">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% if submissions|length == 0 %}
+<div class="empty">Результатов нет.</div>
+{% endif %}
+{% endblock %}

@@ -18,6 +18,12 @@
             </div>
         </div>
 
+        {% if is_own_profile or current_user.admin %}
+        <div class="profile-actions">
+            <a class="btn btn-primary" href="/edit/profile/{{ user.id }}">Редактировать профиль</a>
+        </div>
+        {% endif %}
+
         <div class="stats-cards">
             <div class="stat-card">
                 <div class="stat-value">{{ user.elo_rating|round|int }}</div>

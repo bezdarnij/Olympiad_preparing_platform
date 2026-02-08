@@ -1,5 +1,5 @@
-{% extends "base.html" %}
-{% block title %}Таблица пользователей{% endblock %}
+﻿{% extends "base.html" %}
+{% block title %}Админ панель{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='admin_first.css') }}">
@@ -7,6 +7,8 @@
 
 {% block content %}
 <a class="btn btn-task" href="/admin/task_list">Список задач</a>
+<a class="btn btn-task" href="/admin/competitions">Управление соревнованиями</a>
+<a class="btn btn-task" href="/admin/results">Управление результатами</a>
 
 <form method="post" action="/admin">
 <div class="table-container">
@@ -15,6 +17,7 @@
             <td>id</td>
             <td>name</td>
             <td>email</td>
+            <td>elo</td>
             <td>admin</td>
             <td>ban</td>
         </tr>
@@ -23,6 +26,7 @@
             <td>{{user.id}}</td>
             <td>{{ user.name }}</td>
             <td>{{user.email}}</td>
+            <td>{{user.elo_rating|round|int}}</td>
             <td>
                 <select class="admin-select" name="admin_{{user.id}}">
                     {% if user.admin == 1 %}
@@ -46,6 +50,7 @@
                 </select>
             </td>
             <td><a href="/admin/profile/{{user.id}}">Посмотреть статистику</a></td>
+            <td><a href="/edit/profile/{{user.id}}">Изменить профиль</a></td>
         </tr>
         {% endfor %}
     </table>

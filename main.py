@@ -215,6 +215,53 @@ def profile(user_id=None):
     )
 
 
+@app.route('/edit/profile', methods=['GET', 'POST'])
+@app.route('/edit/profile/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@user_ban
+def edit_profile(user_id=None):
+    subject = session.get('subject')
+    db_sess = db_session.create_session()
+    if user_id is None:
+        user = current_user
+    else:
+        user = db_sess.get(User, user_id)
+        if not user:
+            abort(404)
+        if user.id != current_user.id and not current_user.admin:
+            abort(403)
+
+    message = None
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        password_confirm = request.form.get('password_confirm', '')
+
+        if not name or not email:
+            message = "Имя и почта обязательны"
+        elif db_sess.query(User).filter(User.email == email, User.id != user.id).first():
+            message = "Эта почта уже используется"
+        elif password or password_confirm:
+            if password != password_confirm:
+                message = "Пароли не совпадают"
+            else:
+                user.set_password(password)
+
+        if message is None:
+            user.name = name
+            user.email = email
+            db_sess.commit()
+            return redirect(f"/profile/{user.id}")
+
+    return render_template(
+        'edit_profile.html',
+        user=user,
+        subject=subject,
+        message=message
+    )
+
+
 @app.route('/admin', methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -238,6 +285,112 @@ def admin():
         db_sess.commit()
         return redirect('/admin')
     return render_template("admin_first.html", users=users, subject=subject)
+
+
+@app.route('/admin/competitions', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin_competitions():
+    subject = session.get('subject')
+    db_sess = db_session.create_session()
+    message = None
+    error = None
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        room = request.form.get("room")
+        if not room or room not in matches:
+            error = "Комната не найдена"
+        else:
+            if action == "finish":
+                if matches[room].get("finished"):
+                    message = "Матч уже завершен"
+                elif len(matches[room].get("players", [])) < 2:
+                    error = "Недостаточно игроков для завершения"
+                else:
+                    result = finish_match(room)
+                    message = f"Матч завершен: {result}"
+            elif action == "cancel":
+                matches.pop(room, None)
+                message = "Комната удалена"
+            else:
+                error = "Неизвестное действие"
+
+    rooms = []
+    for room_id, info in matches.items():
+        players = []
+        for uid in info.get('players', []):
+            user = db_sess.get(User, int(uid))
+            players.append(user.name if user else f"#{uid}")
+        rooms.append({
+            "room": room_id,
+            "subject": info.get("subject"),
+            "players": players,
+            "player_count": len(info.get("players", [])),
+            "finished": info.get("finished", False),
+            "result": info.get("result"),
+            "task_id": info.get("task_id")
+        })
+
+    return render_template(
+        "admin_competitions.html",
+        subject=subject,
+        rooms=rooms,
+        message=message,
+        error=error
+    )
+
+
+@app.route('/admin/results', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin_results():
+    subject = session.get('subject')
+    db_sess = db_session.create_session()
+    message = None
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        if action == "delete":
+            submission_id = request.form.get("submission_id")
+            if submission_id and submission_id.isdigit():
+                submission = db_sess.get(Submissions, int(submission_id))
+                if submission:
+                    db_sess.delete(submission)
+                    db_sess.commit()
+                    message = "Результат удален"
+
+    user_id = request.args.get("user_id", "").strip()
+    task_id = request.args.get("task_id", "").strip()
+    verdict = request.args.get("verdict", "").strip()
+    limit_raw = request.args.get("limit", "").strip()
+
+    query = db_sess.query(Submissions).order_by(Submissions.created_at.desc())
+    if user_id.isdigit():
+        query = query.filter(Submissions.user_id == int(user_id))
+    if task_id.isdigit():
+        query = query.filter(Submissions.task_id == int(task_id))
+    if verdict:
+        query = query.filter(Submissions.verdict == verdict)
+
+    limit = 200
+    if limit_raw.isdigit():
+        limit = min(int(limit_raw), 1000)
+
+    submissions = query.limit(limit).all()
+
+    return render_template(
+        "admin_results.html",
+        subject=subject,
+        submissions=submissions,
+        message=message,
+        user_id=user_id,
+        task_id=task_id,
+        verdict=verdict,
+        limit=limit
+    )
 
 
 @app.route('/admin/task', methods=["GET", "POST"])
