@@ -936,7 +936,7 @@ def pvp_room(subject, room):
                 result = finish_match(room)
                 socketio.emit('match_finished', {'result': result}, room=room)
 
-            return redirect(f"/{subject}/pvp/room/{room}")
+                return redirect(f"/{subject}/")
 
         players_info = []
         for uid_str in matches[room]['players']:
