@@ -17,6 +17,8 @@ import os
 import subprocess
 
 from functools import wraps
+from collections import defaultdict
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
@@ -259,6 +261,73 @@ def edit_profile(user_id=None):
         user=user,
         subject=subject,
         message=message
+    )
+
+
+@app.route('/analytics')
+@login_required
+@user_ban
+def analytics():
+    subject = session.get('subject')
+    db_sess = db_session.create_session()
+    submissions = db_sess.query(Submissions).join(Tasks).all()
+
+    total_submissions = len(submissions)
+    ok_submissions = sum(1 for s in submissions if s.verdict == "OK")
+    accuracy = (ok_submissions / total_submissions * 100) if total_submissions else 0
+
+    task_attempts = defaultdict(list)
+    theme_stats = {}
+    solve_times = []
+
+    for s in submissions:
+        task_attempts[(s.user_id, s.task_id)].append(s)
+
+    for (user_id, task_id), subs in task_attempts.items():
+        subs_sorted = sorted(subs, key=lambda x: x.created_at or datetime.min)
+        first_time = subs_sorted[0].created_at
+        ok_time = None
+        for s in subs_sorted:
+            if s.verdict == "OK":
+                ok_time = s.created_at
+                break
+        if first_time and ok_time and ok_time >= first_time:
+            solve_times.append((ok_time - first_time).total_seconds())
+
+        task = subs_sorted[0].tasks
+        theme = task.theme if task and task.theme else "Без темы"
+        if theme not in theme_stats:
+            theme_stats[theme] = {"total": 0, "ok": 0, "solve_times": []}
+        theme_stats[theme]["total"] += len(subs_sorted)
+        theme_stats[theme]["ok"] += sum(1 for s in subs_sorted if s.verdict == "OK")
+        if first_time and ok_time and ok_time >= first_time:
+            theme_stats[theme]["solve_times"].append((ok_time - first_time).total_seconds())
+
+    avg_solve_time = sum(solve_times) / len(solve_times) if solve_times else None
+
+    theme_rows = []
+    max_theme_total = max((v["total"] for v in theme_stats.values()), default=0)
+    for theme, data in sorted(theme_stats.items(), key=lambda x: x[0]):
+        theme_accuracy = (data["ok"] / data["total"] * 100) if data["total"] else 0
+        theme_avg_time = (sum(data["solve_times"]) / len(data["solve_times"])
+                          if data["solve_times"] else None)
+        theme_rows.append({
+            "theme": theme,
+            "total": data["total"],
+            "ok": data["ok"],
+            "accuracy": theme_accuracy,
+            "avg_time": theme_avg_time,
+            "bar": (data["total"] / max_theme_total * 100) if max_theme_total else 0
+        })
+
+    return render_template(
+        "analytics.html",
+        subject=subject,
+        total_submissions=total_submissions,
+        ok_submissions=ok_submissions,
+        accuracy=accuracy,
+        avg_solve_time=avg_solve_time,
+        theme_rows=theme_rows
     )
 
 
