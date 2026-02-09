@@ -7,7 +7,7 @@
 {% block content %}
 <form method="get">
     <h3>Сложность:</h3>
-    {% for difficulty in ['Легкая', 'Средняя', 'Сложная'] %}
+    {% for difficulty in ['легкая', 'средняя', 'сложная'] %}
     <input type="checkbox" name="difficulty" value="{{ difficulty }}"
            id="diff_{{ loop.index }}" {% if difficulty in selected_difficulties %}checked{% endif %}>
     <label for="diff_{{ loop.index }}">{{ difficulty }}</label>

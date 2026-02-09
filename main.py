@@ -37,6 +37,11 @@ def forbidden(e):
     return render_template("403.html"), 403
 
 
+@app.errorhandler(401)
+def unauthorized(e):
+    return render_template("401.html"), 401
+
+
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
@@ -560,15 +565,15 @@ def admin_task_list():
             h = next(reader)
             for row in reader:
                 task = Tasks(
-                    subject=row[0],
-                    theme=row[1],
-                    difficulty=row[2],
-                    title=row[3],
-                    statement=row[4],
-                    input_format=row[5],
-                    output_format=row[6],
-                    time_limit=row[7],
-                    memory_limit=row[8]
+                    subject=row[1],
+                    theme=row[2],
+                    difficulty=row[3],
+                    title=row[4],
+                    statement=row[5],
+                    input_format=row[6],
+                    output_format=row[7],
+                    time_limit=row[8],
+                    memory_limit=row[9]
                 )
                 db_sess.add(task)
                 db_sess.commit()
@@ -650,6 +655,7 @@ def ai(subject_admin, difficulty):
                 db_sess.add(task_test)
             db_sess.add(task)
             db_sess.commit()
+            return redirect('/admin')
     else:
         if request.method == "POST":
             db_sess = db_session.create_session()
@@ -688,7 +694,7 @@ def export():
     output = io.StringIO()
     writer = csv.writer(output)
 
-    writer.writerow(['ID', 'SUBJECT', 'THEME', 'DIFFICULTY', 'TITLE', 'STATEMENT', 'INPUT_FORMAT', 'TIME_LIMIT', 'MEMORY_LIMIT'])
+    writer.writerow(['ID', 'SUBJECT', 'THEME', 'DIFFICULTY', 'TITLE', 'STATEMENT', 'INPUT_FORMAT', 'OUTPUT_FORMAT', 'TIME_LIMIT', 'MEMORY_LIMIT'])
 
     db_sess = db_session.create_session()
     tasks = db_sess.query(Tasks).all()
