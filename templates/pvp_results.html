@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Результаты PvP{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='results.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Результаты PvP</h1>
+
+    <div class="result">
+        {{ result }}
+    </div>
+
+    {% for player in players %}
+        <div class="player {% if player.is_winner %}winner{% endif %}">
+            <h3>{{ player.name }}</h3>
+            <p>Очки: {{ player.score }}</p>
+            <p>ELO: {{ player.elo|round|int }}</p>
+        </div>
+    {% endfor %}
+
+    <a href="/{{ subject }}/">
+        <button>Вернуться к задачам</button>
+    </a>
+</div>
+{% endblock %}

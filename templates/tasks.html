@@ -7,13 +7,13 @@
 {% block content %}
 <form method="get">
     <h3>Сложность:</h3>
-    {% for difficulty in difficulties %}
+    {% for difficulty in ['легкая', 'средняя', 'сложная'] %}
     <input type="checkbox" name="difficulty" value="{{ difficulty }}"
            id="diff_{{ loop.index }}" {% if difficulty in selected_difficulties %}checked{% endif %}>
-    <label for="diff_{{ loop.index }}">{{ difficulty }}</label><br>
+    <label for="diff_{{ loop.index }}">{{ difficulty }}</label>
     {% endfor %}
 
-    <h3>Тема:</h3>
+    <h3 style="margin-left: auto;">Тема:</h3>
     <select name="theme" multiple size="1">
     {% for theme in themes %}
     <option value="{{ theme }}"
@@ -23,9 +23,8 @@
     {% endfor %}
     </select>
 
-    <br><br>
-    <input type="submit" value="Применить фильтры">
-    <a href="/{{ subject }}/">Сбросить фильтры</a>
+    <input type="submit" value="Применить">
+    <a href="/{{ subject }}/">Сбросить</a>
 </form>
 {% if tasks %}
     {% for task in tasks %}
@@ -38,15 +37,13 @@
         <p>Тема: {{ task.theme or 'Не указана' }}</p>
         <p>Сложность: {{ task.difficulty or 'Не указана' }}</p>
         <div class="task-meta">
-            <span class="status-badge badge-success">
-                {% if submissions.filter(Submissions.task_id == task.id).filter(Submissions.verdict == 'OK').all() != [] %}
-                Решено верно
-                {% elif submissions.filter(Submissions.task_id == task.id).all() != [] %}
-                Решено неверно
-                {% else %}
-                Нерешённая
-                {% endif %}
-            </span>
+            {% if submissions.filter(Submissions.task_id == task.id).filter(Submissions.verdict == 'OK').all() != [] %}
+            <span class="status-badge badge-success">✓ Решено верно</span>
+            {% elif submissions.filter(Submissions.task_id == task.id).all() != [] %}
+            <span class="status-badge badge-danger">✗ Решено неверно</span>
+            {% else %}
+            <span class="status-badge badge-default">◯ Нерешённая</span>
+            {% endif %}
         </div>
     </div>
     {% endfor %}

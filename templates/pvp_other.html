@@ -13,39 +13,18 @@
 <div class="condition">
     <h2>{{ task.title }}</h2>
     <p>{{ task.statement }}</p>
-    <p>Лимит времени: {{ task.time_limit }}</p>
-    <p>Лимит памяти: {{ task.memory_limit }}</p>
-</div>
-
-<div class="Input">
-    <p>{{ task.input_format }}</p>
-    <p>{{ task.output_format }}</p>
-    <p>Примеры</p>
-</div>
-
-<div class="examples">
-    <div class="example">
-        <p><strong>Input</strong></p>
-        <pre>{{ test.input_data }}</pre>
-    </div>
-
-    <div class="example">
-        <p><strong>Output</strong></p>
-        <pre>{{ test.output }}</pre>
-    </div>
 </div>
 
 <p>Вердикт: <span id="verdict-player"></span></p>
-{% if test_passed is not none %}
-<p>Пройдено тестов: {{ test_passed }}</p>
-{% endif %}
 
 <div class="task">
-    <form class="send" method="post" enctype="multipart/form-data" id="uploadForm">
-        <input type="file" accept=".py" name="file" id="pythonFile" required />
-        <button type="submit" id="submitBtn">Отправить</button>
+    <form class="send" method="post">
+        <div class="answer_field">
+            <label>Введите ответ: </label>
+            <input type="text" name="answer" />
+        </div>
+        <button type="submit" id="submitBtn">Отправить ответ</button>
     </form>
-
     <div class="scores">
         <p>Соперник решил задач: <span id="opponent-score">0</span></p>
         <p>Ты решил задач: <span id="your-score">0</span></p>
@@ -83,36 +62,10 @@ socket.on('update_scores', function (data) {
     document.getElementById('opponent-score').textContent = opponentScore
     document.getElementById('player-count').textContent = data.player_count
 })
+
 socket.on('match_finished', function(data) {
     alert(data.result)
     window.location.href = `/{{ subject }}/pvp/results/{{ room }}`
-})
-
-document.getElementById('uploadForm').addEventListener('submit', function (event) {
-    const fileInput = document.getElementById('pythonFile')
-
-    if (!fileInput.files || fileInput.files.length === 0) {
-        event.preventDefault()
-        alert('Пожалуйста, выберите файл.')
-        return false
-    }
-
-    const file = fileInput.files[0]
-    const fileExtension = file.name.split('.').pop().toLowerCase()
-
-    if (fileExtension !== 'py') {
-        event.preventDefault()
-        alert('Допускаются только файлы с расширением .py')
-        return false
-    }
-
-    if (file.size > 1024 * 1024) {
-        event.preventDefault()
-        alert('Файл слишком большой. Максимальный размер: 1MB')
-        return false
-    }
-
-    return true
 })
 </script>
 {% endblock %}

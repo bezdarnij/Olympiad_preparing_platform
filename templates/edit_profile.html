@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='edit_profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="edit-profile">
+    <div class="card">
+        <div class="card-header">
+            <h1>Редактирование профиля</h1>
+            <p>Обновите имя, почту и пароль.</p>
+        </div>
+
+        {% if message %}
+        <div class="alert">{{ message }}</div>
+        {% endif %}
+
+        <form class="form" method="post">
+            <label class="field">
+                <span>Имя</span>
+                <input type="text" name="name" value="{{ user.name or '' }}" required>
+            </label>
+
+            <label class="field">
+                <span>Почта</span>
+                <input type="email" name="email" value="{{ user.email or '' }}" required>
+            </label>
+
+            <div class="divider"></div>
+
+            <label class="field">
+                <span>Новый пароль</span>
+                <input type="password" name="password" placeholder="Оставьте пустым, если не менять">
+            </label>
+
+            <label class="field">
+                <span>Повтор пароля</span>
+                <input type="password" name="password_confirm" placeholder="Повторите пароль">
+            </label>
+
+            <div class="actions">
+                <a class="btn btn-secondary" href="/profile/{{ user.id }}">Назад</a>
+                <button class="btn btn-primary" type="submit">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

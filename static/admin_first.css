@@ -1,20 +1,30 @@
-/* ===== Admin Panel Styles ===== */
+h1 {
+    font-size: 36px;
+    font-weight: 800;
+    text-align: center;
+    margin: 0 0 32px 0;
+    background: linear-gradient(135deg, #6d28d9, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
 
-/* ===== Add Task Button ===== */
 .btn-task {
     display: inline-block;
-    background: linear-gradient(135deg, #059669, #10b981);
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #ffffff !important;
     font-size: 16px;
     font-weight: 700;
     padding: 12px 28px;
     border-radius: 12px;
     text-decoration: none;
-    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
     transition: all 0.3s ease;
     margin-bottom: 32px;
     position: relative;
     overflow: hidden;
+    border: none;
+    cursor: pointer;
 }
 
 .btn-task::before {
@@ -37,54 +47,72 @@
 
 .btn-task:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(5, 150, 105, 0.4);
-    background: linear-gradient(135deg, #047857, #059669);
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);
+    background: linear-gradient(135deg, #6d28d9, #7c3aed);
     color: #ffffff !important;
 }
 
-/* ===== Users List ===== */
-ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+form {
+    animation: fadeIn 0.5s ease-out 0.1s backwards;
 }
 
-li {
+.table-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 24px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(124, 58, 237, 0.12);
+}
+
+.table-container table {
+    width: 100%;
+    border-collapse: collapse;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
-    border: 2px solid rgba(168, 85, 247, 0.2);
-    border-radius: 16px;
-    padding: 20px 24px;
-    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.1);
-    transition: all 0.3s ease;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px;
+}
+
+.table-container table tr:first-child {
+    background: linear-gradient(135deg, #ffffff, #ffffff);
+    color: #ffffff;
+}
+
+.table-container table tr:first-child td {
+    padding: 18px 20px;
+    font-weight: 800;
     font-size: 15px;
-    color: #4c1d95;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+}
+
+.table-container table tr:not(:first-child) {
+    border-bottom: 2px solid rgba(168, 85, 247, 0.1);
+    transition: all 0.3s ease;
+}
+
+.table-container table tr:not(:first-child):hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(168, 85, 247, 0.08));
+    box-shadow: inset 0 0 12px rgba(124, 58, 237, 0.08);
+    transform: translateY(-2px);
+}
+
+.table-container table td {
+    padding: 16px 20px;
+    color: #374151;
+    font-size: 15px;
     font-weight: 500;
+    border: none;
+    vertical-align: middle;
 }
 
-li:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.15);
-    border-color: rgba(168, 85, 247, 0.35);
+.table-container table tr:nth-child(even):not(:first-child) {
+    background: rgba(168, 85, 247, 0.03);
 }
 
-/* ===== User Info Styling ===== */
-li::before {
-    content: '👤';
-    font-size: 20px;
-    margin-right: 8px;
-}
-
-/* ===== Select Dropdowns ===== */
-select {
-    padding: 8px 14px;
+.admin-select,
+.ban-select {
+    padding: 8px 12px;
     border: 2px solid rgba(168, 85, 247, 0.3);
     border-radius: 8px;
     background: #ffffff;
@@ -94,21 +122,40 @@ select {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 3px 10px rgba(124, 58, 237, 0.08);
-    min-width: 100px;
+    width: 100%;
 }
 
-select:hover {
+.admin-select:hover,
+.ban-select:hover {
     border-color: #7c3aed;
     box-shadow: 0 4px 15px rgba(124, 58, 237, 0.15);
+    transform: translateY(-2px);
 }
 
-select:focus {
+.admin-select:focus,
+.ban-select:focus {
     outline: none;
     border-color: #7c3aed;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
 }
 
-/* ===== Apply Button ===== */
+.table-container table a {
+    color: #7c3aed;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.table-container table a:hover {
+    color: #ffffff;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    transform: translateY(-2px);
+}
+
 #applytBtn {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #ffffff !important;
@@ -124,8 +171,8 @@ select:focus {
     overflow: hidden;
     margin-top: 32px;
     display: block;
-    width: 100%;
-    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #applytBtn::before {
@@ -150,48 +197,13 @@ select:focus {
     transform: translateY(-3px);
     box-shadow: 0 12px 35px rgba(124, 58, 237, 0.45);
     background: linear-gradient(135deg, #6d28d9, #7c3aed);
+    color: #ffffff !important;
 }
 
 #applytBtn:active {
     transform: translateY(-1px);
 }
 
-/* ===== User ID Badge ===== */
-li > * {
-    margin: 4px 0;
-}
-
-/* ===== Responsive Design ===== */
-@media (max-width: 768px) {
-    li {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 16px 20px;
-        font-size: 14px;
-    }
-
-    select {
-        width: 100%;
-    }
-
-    .btn-task {
-        width: 100%;
-        text-align: center;
-    }
-
-    #applytBtn {
-        max-width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    li {
-        padding: 14px 16px;
-        gap: 12px;
-    }
-}
-
-/* ===== Animations ===== */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -207,40 +219,14 @@ li > * {
     animation: fadeIn 0.4s ease-out;
 }
 
-li {
-    animation: fadeIn 0.5s ease-out;
+.table-container {
+    animation: fadeIn 0.5s ease-out 0.1s backwards;
 }
-
-li:nth-child(1) { animation-delay: 0.05s; }
-li:nth-child(2) { animation-delay: 0.1s; }
-li:nth-child(3) { animation-delay: 0.15s; }
-li:nth-child(4) { animation-delay: 0.2s; }
-li:nth-child(5) { animation-delay: 0.25s; }
-li:nth-child(6) { animation-delay: 0.3s; }
-li:nth-child(7) { animation-delay: 0.35s; }
-li:nth-child(8) { animation-delay: 0.4s; }
-li:nth-child(9) { animation-delay: 0.45s; }
-li:nth-child(10) { animation-delay: 0.5s; }
 
 #applytBtn {
     animation: fadeIn 0.6s ease-out 0.3s backwards;
 }
 
-/* ===== Enhanced User Info Labels ===== */
-li {
-    line-height: 1.8;
-}
-
-/* ===== Status Indicators (optional enhancement) ===== */
-select[value="admin"] {
-    border-color: #7c3aed;
-}
-
-select[value="ban"] {
-    border-color: #dc2626;
-}
-
-/* ===== Loading State for Apply Button ===== */
 #applytBtn.loading {
     pointer-events: none;
     opacity: 0.7;
@@ -266,145 +252,79 @@ select[value="ban"] {
     }
 }
 
-/* admin_first.css */
-
-.table-container {
-    width: 100%;
-    max-width: 1400px;
-    margin: 20px auto;
-    overflow-x: auto; /* Для горизонтальной прокрутки на маленьких экранах */
-}
-
-.table-container table {
-    width: 100%;
-    border-collapse: collapse;
-    border: 2px solid #333;
-    font-family: Arial, sans-serif;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Заголовок таблицы */
-.table-container table tr:first-child {
-    background-color: #4a6fa5;
-    color: white;
-    text-align: left;
-}
-
-/* Ячейки заголовка */
-.table-container table tr:first-child td {
-    padding: 16px 20px;
-    font-weight: bold;
-    font-size: 1.1em;
-    border: 1px solid #2a4a75;
-    border-bottom: 2px solid #333;
-}
-
-/* Все строки */
-.table-container table tr {
-    border-bottom: 1px solid #ddd;
-}
-
-/* Все ячейки */
-.table-container table td {
-    padding: 14px 20px;
-    border: 1px solid #ddd;
-    vertical-align: middle;
-}
-
-/* Чередование цвета строк (кроме заголовка) */
-.table-container table tr:nth-child(even):not(:first-child) {
-    background-color: #f8f9fa;
-}
-
-/* Эффект при наведении на строку (кроме заголовка) */
-.table-container table tr:hover:not(:first-child) {
-    background-color: #e9ecef;
-    cursor: pointer;
-}
-
-/* Стили для select внутри таблицы */
-.table-container table select {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: white;
-    font-size: 0.95em;
-    cursor: pointer;
-}
-
-.table-container table select:hover {
-    border-color: #4a6fa5;
-}
-
-/* Кнопки */
-.btn-task {
-    display: inline-block;
-    margin: 20px;
-    padding: 12px 24px;
-    background-color: #28a745;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-task:hover {
-    background-color: #218838;
-}
-
-#applytBtn {
-    display: block;
-    width: 220px;
-    margin: 30px auto;
-    padding: 14px 28px;
-    background-color: #4a6fa5;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-#applytBtn:hover {
-    background-color: #3a5a8a;
-}
-
-/* Специальные стили для ячеек */
-.table-container table td:first-child {
-    font-weight: bold;
-    color: #555;
-}
-
-.table-container table td:nth-child(3) {
-    color: #3498db;
-}
-
-/* Адаптивность */
 @media (max-width: 768px) {
-    .table-container {
-        margin: 10px;
-    }
-
-    .table-container table {
-        font-size: 0.9em;
-    }
-
-    .table-container table td {
-        padding: 10px 12px;
-    }
-
-    .table-container table tr:first-child td {
-        padding: 12px 14px;
+    h1 {
+        font-size: 28px;
+        margin-bottom: 24px;
     }
 
     .btn-task {
-        margin: 10px;
+        width: 100%;
+        text-align: center;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .table-container table {
+        font-size: 14px;
+    }
+
+    .table-container table tr:first-child td {
+        padding: 14px 12px;
+        font-size: 13px;
+    }
+
+    .table-container table td {
+        padding: 12px 12px;
+    }
+
+    .admin-select,
+    .ban-select {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    .table-container table a {
+        padding: 4px 8px;
+        font-size: 13px;
+    }
+
+    #applytBtn {
+        width: 100%;
+        padding: 12px 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 24px;
+        margin-bottom: 16px;
+    }
+
+    .table-container {
+        border-radius: 12px;
+    }
+
+    .table-container table {
+        font-size: 12px;
+    }
+
+    .table-container table tr:first-child td {
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+
+    .table-container table td {
+        padding: 10px 8px;
+    }
+
+    .btn-task {
         padding: 10px 20px;
-        width: calc(100% - 20px);
+        font-size: 14px;
+    }
+
+    #applytBtn {
+        padding: 10px 20px;
+        font-size: 14px;
     }
 }

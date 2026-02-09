@@ -2,6 +2,7 @@
 {% block title %}Admin{% endblock %}
 {% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">{% endblock %}
 {% block content %}
+<a class="btn btn-task-ai" href="/admin/task_ai/{{ subject_admin }}">Создать с помощью ии</a>
         <div class="container">
             <h1>Создание задачи</h1>
             <form method="post" class="task-form">

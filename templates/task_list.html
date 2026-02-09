@@ -2,38 +2,41 @@
 {% block title %}Таблица пользователей{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='admin_first.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='task_list.css') }}">
 {% endblock %}
 
 {% block content %}
 
 <a class="btn btn-task" href="/admin/task">Добавить задачу</a>
 
+<a class="btn btn-export" href="/export">Экспорт задач</a>
+
+<div class="task-import">
+    <p>Импорт задач</p>
+    <form class="send" method="post" enctype="multipart/form-data" id="uploadForm">
+        <input type="file" accept=".csv" name="file" id="csvFile" required />
+        <button type="submit" id="submitBtn">Отправить</button>
+    </form>
+</div>
+
 <div class="table-container">
     <table>
         <tr>
             <td>id</td>
+            <td>difficulty</td>
             <td>subject</td>
             <td>theme</td>
             <td>title</td>
             <td>statement</td>
-            <td>input_format</td>
-            <td>output_format</td>
-            <td>time_limit</td>
-            <td>difficulty</td>
         </tr>
         {% for task in tasks %}
         <tr>
             <td>{{ task.id }}</td>
+            <td>{{ task.difficulty }}</td>
             <td>{{ task.subject }}</td>
             <td>{{ task.title }}</td>
             <td>{{ task.theme }}</td>
             <td>{{ task.statement }}</td>
-            <td>{{ task.input_format }}</td>
-            <td>{{ task.output_format }}</td>
-            <td>{{ task.time_limit }}</td>
-            <td>{{ task.memory_limit }}</td>
-            <td>{{ task.difficulty }}</td>
             <td><a class="btn btn-task" href="/admin/task_edit/{{task.id}}">Изменить задачу</a></td>
             <td><a class="btn btn-task" href="/admin/task_delete/{{task.id}}">Удалить задачу</a></td>
         </tr>

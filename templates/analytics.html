@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Аналитика{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Аналитика</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Всего попыток</div>
+        <div class="stat-value">{{ total_submissions }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Успешные</div>
+        <div class="stat-value">{{ ok_submissions }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Точность</div>
+        <div class="stat-value">{{ accuracy|round(1) }}%</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Средняя скорость решения</div>
+        <div class="stat-value">
+            {% if avg_solve_time is not none %}
+                {{ (avg_solve_time / 60)|round(1) }} мин
+            {% else %}
+                —
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-title">Статистика по темам</div>
+    <div class="table-container">
+        <table>
+            <tr>
+                <td>Тема</td>
+                <td>Попытки</td>
+                <td>Успешные</td>
+                <td>Точность</td>
+                <td>Средняя скорость</td>
+                <td>Объем</td>
+            </tr>
+            {% for row in theme_rows %}
+            <tr>
+                <td>{{ row.theme }}</td>
+                <td>{{ row.total }}</td>
+                <td>{{ row.ok }}</td>
+                <td>{{ row.accuracy|round(1) }}%</td>
+                <td>
+                    {% if row.avg_time is not none %}
+                        {{ (row.avg_time / 60)|round(1) }} мин
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="bar">
+                        <span style="width: {{ row.bar }}%"></span>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% if theme_rows|length == 0 %}
+    <div class="empty">Пока нет данных.</div>
+    {% endif %}
+</div>
+{% endblock %}

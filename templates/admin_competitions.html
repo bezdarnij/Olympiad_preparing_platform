@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Управление соревнованиями{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='admin_first.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin_competitions.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Соревнования</h1>
+
+<div class="admin-actions">
+    <a class="btn btn-task" href="/admin">Пользователи</a>
+    <a class="btn btn-task" href="/admin/task_list">Задачи</a>
+    <a class="btn btn-task" href="/admin/results">Результаты</a>
+</div>
+
+{% if message %}
+<div class="alert success">{{ message }}</div>
+{% endif %}
+{% if error %}
+<div class="alert error">{{ error }}</div>
+{% endif %}
+
+<div class="table-container">
+    <table>
+        <tr>
+            <td>room</td>
+            <td>subject</td>
+            <td>task_id</td>
+            <td>players</td>
+            <td>status</td>
+            <td>result</td>
+            <td>actions</td>
+        </tr>
+        {% for room in rooms %}
+        <tr>
+            <td class="mono">{{ room.room }}</td>
+            <td>{{ room.subject }}</td>
+            <td>{{ room.task_id }}</td>
+            <td>{{ room.players|join(', ') }}</td>
+            <td>
+                {% if room.finished %}
+                    <span class="status done">завершен</span>
+                {% else %}
+                    <span class="status pending">в процессе</span>
+                {% endif %}
+            </td>
+            <td>{{ room.result or "-" }}</td>
+            <td>
+                <div class="actions">
+                    {% if (not room.finished) and (room.player_count == 2) %}
+                    <form method="post" class="inline-form">
+                        <input type="hidden" name="room" value="{{ room.room }}">
+                        <input type="hidden" name="action" value="finish">
+                        <button type="submit" class="btn btn-small">Завершить</button>
+                    </form>
+                    {% endif %}
+                    <form method="post" class="inline-form">
+                        <input type="hidden" name="room" value="{{ room.room }}">
+                        <input type="hidden" name="action" value="cancel">
+                        <button type="submit" class="btn btn-small btn-danger">Удалить</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% if rooms|length == 0 %}
+<div class="empty">Активных соревнований нет.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,130 @@
+.difficulty-page {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.difficulty-page h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.difficulty-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.difficulty-btn {
+    display: inline-block;
+    padding: 16px 40px;
+    color: white;
+    text-decoration: none;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.difficulty-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.difficulty-btn:hover {
+    transform: translateY(-3px);
+}
+
+.difficulty-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.difficulty-easy {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+.difficulty-easy:hover {
+    box-shadow: 0 6px 25px rgba(79, 70, 229, 0.4);
+    border-color: rgba(124, 58, 237, 0.3);
+}
+
+.difficulty-medium {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+}
+
+.difficulty-medium:hover {
+    box-shadow: 0 6px 25px rgba(124, 58, 237, 0.4);
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+.difficulty-hard {
+    background: linear-gradient(135deg, #a855f7, #d946ef);
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+
+.difficulty-hard:hover {
+    box-shadow: 0 6px 25px rgba(168, 85, 247, 0.4);
+    border-color: rgba(217, 70, 239, 0.3);
+}
+
+@media (max-width: 768px) {
+    .difficulty-page h1 {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+
+    .difficulty-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .difficulty-btn {
+        width: 100%;
+        max-width: 280px;
+        padding: 14px 28px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .difficulty-page h1 {
+        font-size: 1.4rem;
+        margin-bottom: 25px;
+    }
+
+    .difficulty-buttons {
+        gap: 12px;
+    }
+
+    .difficulty-btn {
+        width: 100%;
+        max-width: 260px;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        border-radius: 12px;
+    }
+}

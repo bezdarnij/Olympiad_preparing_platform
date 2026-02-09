@@ -129,6 +129,10 @@ input[type="checkbox"] + label {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .btn-primary::before {
@@ -281,4 +285,14 @@ form a:hover {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Ensure header buttons stay vertically centered on the login page
+   This targets only buttons inside the header when login.css is loaded
+   and does not change header markup in base.html. */
+.site-header .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }

@@ -1,12 +1,9 @@
-/* ===== Choose Room Page Styles ===== */
-
 .choose {
     max-width: 800px;
     margin: 0 auto;
     padding: 40px 24px;
 }
 
-/* ===== Main Heading ===== */
 .choose p:first-of-type {
     font-size: 28px;
     font-weight: 800;
@@ -19,7 +16,6 @@
     background-clip: text;
 }
 
-/* ===== Create Room Button ===== */
 .btn-success {
     display: inline-block;
     background: linear-gradient(135deg, #059669, #10b981);
@@ -61,7 +57,6 @@
     color: #ffffff !important;
 }
 
-/* ===== Input Section ===== */
 #roomCode {
     width: 100%;
     max-width: 400px;
@@ -88,7 +83,6 @@
     transform: translateY(-1px);
 }
 
-/* ===== Join Button ===== */
 .choose button {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #ffffff;
@@ -132,12 +126,10 @@
     transform: translateY(0);
 }
 
-/* ===== Input Container ===== */
 .choose > br + br + input {
     margin-top: 24px;
 }
 
-/* ===== Room List Heading ===== */
 .choose p {
     font-size: 22px;
     font-weight: 700;
@@ -145,11 +137,17 @@
     margin: 36px 0 20px;
 }
 
-/* ===== Rooms List ===== */
 .choose ul {
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+.choose .room-list-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 36px 0 20px;
 }
 
 .choose li {
@@ -173,14 +171,12 @@
     background: rgba(255, 255, 255, 1);
 }
 
-/* ===== Room Text ===== */
 .choose li::before {
     content: '🎮';
     margin-right: 12px;
     font-size: 20px;
 }
 
-/* ===== Join Link in List ===== */
 .choose li a {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #ffffff;
@@ -219,7 +215,6 @@
     background: linear-gradient(135deg, #6d28d9, #7c3aed);
 }
 
-/* ===== Empty State ===== */
 .choose p:last-of-type {
     text-align: center;
     color: #6b7280;
@@ -249,7 +244,6 @@
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
 }
 
-/* ===== Responsive Design ===== */
 @media (max-width: 768px) {
     .choose {
         padding: 24px 16px;
@@ -276,7 +270,6 @@
     }
 }
 
-/* ===== Animation for List Items ===== */
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -298,7 +291,6 @@
 .choose li:nth-child(4) { animation-delay: 0.2s; }
 .choose li:nth-child(5) { animation-delay: 0.25s; }
 
-/* ===== Loading Animation (optional) ===== */
 @keyframes pulse {
     0%, 100% {
         opacity: 1;
