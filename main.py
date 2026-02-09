@@ -949,7 +949,7 @@ def training(subject, task_id):
             f_err = 0
             for test in task_test:
                 p = subprocess.Popen(
-                    ["python", f"submission_{submission_id}.py"],
+                    ["python3", f"submission_{submission_id}.py"],
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
@@ -1062,7 +1062,7 @@ def pvp_room(subject, room):
             f_err = 0
             for test in task_test:
                 p = subprocess.Popen(
-                    ["python", f"submission_{submission_id}.py"],
+                    ["python3", f"submission_{submission_id}.py"],
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
